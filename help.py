@@ -18,7 +18,6 @@ class CustomHelpCommand(commands.HelpCommand):
                     rtnStr += f"\t{command.name} : {command.description}\n"
                 else:                           # case base/parent/groupname command
                     rtnStr += f"\n{self.context.bot.command_prefix}{command.name}\n"
-
         rtnStr = f"```{rtnStr}```"
         await self.get_destination().send(rtnStr)
 
