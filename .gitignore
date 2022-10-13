@@ -1,0 +1,17 @@
+.env
+__pycache__/caption_generator.cpython-310.pyc
+__pycache__/help.cpython-310.pyc
+__pycache__/main.cpython-310.pyc
+__pycache__/util.cpython-310.pyc
+.idea/.gitignore
+.idea/daerbot.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/workspace-DESKTOP-AOBHCS0.xml
+.idea/workspace-DESKTOP-VO733JV.xml
+.idea/inspectionProfiles/profiles_settings.xml
+cogs/__pycache__/Caption.cpython-310.pyc
+cogs/__pycache__/DonutHypeman.cpython-310.pyc
+cogs/__pycache__/LemePost.cpython-310.pyc
+cogs/__pycache__/Priv9.cpython-310.pyc
