@@ -26,7 +26,7 @@ class CaptionGenerator:
     def get_y_offset(self, multiLineStr, font):
         number = 0
         for x in range(0, len(multiLineStr)):
-            number += font.getbbox(multiLineStr[x])[3] - 2
+            number += font.getbbox(multiLineStr[x])[3]
         return number
 
 
@@ -49,7 +49,7 @@ class CaptionGenerator:
         # build the string word by word, and check if it's length is longer than img width
         for x in range(0, wordLen):
             textWidth += font.getlength(words[x] + " ")
-            if textWidth >= maxWidth:
+            if textWidth >= maxWidth and (len(newStr) != 0 and newStr[-1] != "\n"):
                 textWidth = font.getlength(words[x] + " ")
                 newStr += "\n"
                 font.size -= 7 # slightly decrease font size everytime newline added
@@ -61,12 +61,13 @@ class CaptionGenerator:
     # puts the specified text on an image. Bottom text is optional
     def multiline_caption(self, img, captionTop, captionBottom=None):
         draw = ImageDraw.Draw(img)
-        newFont = ImageFont.truetype(font=self.typeFont, size=img.width//10)
+        newFont = ImageFont.truetype(font=self.typeFont, size=((img.height+img.width)//2)//10)
+        margin = math.ceil(0.02*img.height)
 
         # top text
         newCaptionTop = self.get_multiline_string(captionTop, newFont, img.width)
         x = self.get_center_x(newCaptionTop.split(" \n"), img.width, newFont)
-        y = 5
+        y = 0
         self.caption_border(x, y, newCaptionTop, font=newFont, draw=draw)
         draw.text((x, y), newCaptionTop, font=newFont, align="center", spacing=1)
 
@@ -74,7 +75,7 @@ class CaptionGenerator:
         if captionBottom is not None:
             newCaptionBottom = self.get_multiline_string(captionBottom, newFont, img.width)
             x_bottom = self.get_center_x(newCaptionBottom.split("\n"), img.width, newFont)
-            y_bottom = img.height - 15 - self.get_y_offset(newCaptionBottom.split("\n"), newFont)
+            y_bottom = img.height - margin - self.get_y_offset(newCaptionBottom.split("\n"), newFont)
             self.caption_border(x_bottom, y_bottom, newCaptionBottom, font=newFont, draw=draw)
             draw.text((x_bottom, y_bottom), newCaptionBottom, font=newFont, align="center", spacing=1)
 
