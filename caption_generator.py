@@ -26,7 +26,7 @@ class CaptionGenerator:
     def get_y_offset(self, multiLineStr, font):
         number = 0
         for x in range(0, len(multiLineStr)):
-            number += font.getbbox(multiLineStr[x])[3]
+            number += font.getbbox(multiLineStr[x])[3] + 1
         return number
 
 
@@ -39,7 +39,7 @@ class CaptionGenerator:
         draw.text((x + borderSize, y + borderSize), caption, font=font, fill=(0, 0, 0, 255), align="center", spacing=1)
 
 
-    # adds newlines to a string so it doesn't write off the image
+    # formats a string such that it does not run off screen
     def get_multiline_string(self, caption, font, maxWidth):
         textWidth = 0
         words = caption.split(" ")
@@ -49,7 +49,7 @@ class CaptionGenerator:
         # build the string word by word, and check if it's length is longer than img width
         for x in range(0, wordLen):
             textWidth += font.getlength(words[x] + " ")
-            if textWidth >= maxWidth and (len(newStr) != 0 and newStr[-1] != "\n"):
+            if textWidth >= maxWidth and len(newStr) != 0: # and newStr[-1] != "\n"
                 textWidth = font.getlength(words[x] + " ")
                 newStr += "\n"
                 font.size -= 7 # slightly decrease font size everytime newline added

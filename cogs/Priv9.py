@@ -52,8 +52,5 @@ class Priv9(commands.Cog, description="priv9 commands"):
         await ctx.send(file=discord.File(path))
 
 
-
-
-
 async def setup(client):
     await client.add_cog(Priv9(client))

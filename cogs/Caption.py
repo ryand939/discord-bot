@@ -35,10 +35,5 @@ class Caption(commands.Cog, description="caption commands"):
             await util.send_img(ctx, capImg, ext)
 
 
-
-
-
-
-
 async def setup(client):
     await client.add_cog(Caption(client))

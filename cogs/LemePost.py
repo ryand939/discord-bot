@@ -29,13 +29,9 @@ class LemePost(commands.Cog, description="Leme pics and more"):
 
     @leme.command(name="new", description="New randomly generated leme.")
     async def new(self, ctx):
-
-        randnum = randrange(2)
-
-        if randnum == 0:
-            await self.cat(ctx)
-        else:
-            await self.fox(ctx)
+        randnum = randrange(len(self.lemeList))
+        if randnum == 0: await self.cat(ctx)
+        else: await self.fox(ctx)
 
 
 
@@ -53,7 +49,7 @@ class LemePost(commands.Cog, description="Leme pics and more"):
 
     @leme.command(name="this", description="This is leme.")
     async def this(self, ctx):
-        img, ext = await util.get_last_img(ctx, 6)
+        img, ext = await util.get_last_img(ctx, 6) 
         if ext == -1: return 0
         cap_gen = caption_generator.CaptionGenerator("./impact.ttf")
         capImg = cap_gen.multiline_caption(img, "THIS IS LEME")
