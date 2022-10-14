@@ -14,7 +14,9 @@ class LemePost(commands.Cog, description="Leme pics and more"):
     def __init__(self, cli):
         self.cli = cli
         self.lemeList = ["https://api.thecatapi.com/v1/images/search", # lemeList[0] - CAT
-                         "https://randomfox.ca/floof/"]                # lemeList[1] - FOX
+                         "https://randomfox.ca/floof/",                 # lemeList[1] - FOX
+                         "https://dog.ceo/api/breeds/image/random",# lemeList[2] - DOG
+                         "https://random-d.uk/api/random",]
 
 
     @commands.group(name='leme')
@@ -34,11 +36,22 @@ class LemePost(commands.Cog, description="Leme pics and more"):
         else: await self.fox(ctx)
 
 
-
     @leme.command(name="cat", description="Lemes that look like cats.")
     async def cat(self, ctx):
         data = await util.get_json_from_url(self.lemeList[0])
         await ctx.send(data[0]['url'])
+
+
+    @leme.command(name="dog", description="Lemes that look like dogs.")
+    async def cat(self, ctx):
+        data = await util.get_json_from_url(self.lemeList[2])
+        await ctx.send(data['message'])
+
+
+    @leme.command(name="duck", description="Lemes that look like ducks.")
+    async def cat(self, ctx):
+        data = await util.get_json_from_url(self.lemeList[3])
+        await ctx.send(data['url'])
 
 
     @leme.command(name="fox", description="Lemes that look like foxes.")
