@@ -43,13 +43,13 @@ class LemePost(commands.Cog, description="Leme pics and more"):
 
 
     @leme.command(name="dog", description="Lemes that look like dogs.")
-    async def cat(self, ctx):
+    async def dog(self, ctx):
         data = await util.get_json_from_url(self.lemeList[2])
         await ctx.send(data['message'])
 
 
     @leme.command(name="duck", description="Lemes that look like ducks.")
-    async def cat(self, ctx):
+    async def duck(self, ctx):
         data = await util.get_json_from_url(self.lemeList[3])
         await ctx.send(data['url'])
 
