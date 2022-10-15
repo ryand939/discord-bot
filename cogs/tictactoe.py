@@ -1,6 +1,6 @@
 
 from help import CustomHelpCommand
-from discord.ext import commands
+from discord.ext import commands, tasks
 from util import PIL_img_to_file
 from tic_tac_toe.tic_tac_toe_logic import TicTacToeLogic
 
@@ -8,8 +8,8 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
 
 
     def __init__(self, client):
-        #               [0]       [1]        [2]          [3]             [4]        [5]
-        # format ex: ["guild", player1ID, player2ID, TicTacToeLogic, gamemessage, complete]
+        #               [0]       [1]        [2]          [3]             [4]        [5]     [6]
+        # format ex: ["guild", player1ID, player2ID, TicTacToeLogic, gamemessage, complete, task]
         self.activeGameList = []
         self.client = client
         self.inputToCords = {'1' : (0, 0), '2' : (1, 0), '3' : (2, 0), 
@@ -77,7 +77,13 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
         game = self.get_game(ctx)
         if game is not None and (game[1] == player or game[2] == player):
             await game[4].edit(content=f"TicTacToe: Game over, {str(ctx.author)[:-5]} quit.")
+            game[6].cancel()
             self.activeGameList.remove(game)
+
+
+    async def timeout(self, ctx, game):
+        if game[6].current_loop == 1:
+            await self.game_over(ctx, game, f"time ran out.")
 
 
     async def game_over(self, ctx, game, reason):
@@ -88,6 +94,7 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
         game = self.get_game(ctx)
         if game is not None and (game[1] == player or game[2] == player):
             self.activeGameList.remove(game)
+            game[6].cancel()
         
 
     async def update_visual(self, ctx, img, game):
@@ -98,7 +105,6 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
 
 
     def get_game(self, ctx, create=False):
-        player = ctx.author
         # check if there is an active game on the guild
         for game in self.activeGameList:
             if game[0] == ctx.guild:
@@ -112,13 +118,10 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
 
 
     def create_game(self, ctx):
-        self.activeGameList.append([ctx.guild, str(ctx.author), "", TicTacToeLogic(), None, False])
+        timeoutTask = tasks.loop(seconds=300, count=2)(self.timeout)
+        self.activeGameList.append([ctx.guild, str(ctx.author), "", TicTacToeLogic(), None, False, timeoutTask])
+        self.activeGameList[-1][6].start(ctx, self.activeGameList[-1])
 
-    # triggered when user gives invalid input. 
-    # i dont really care to do anything with invalid input at this point in time
-    #@commands.Cog.listener()   
-    #async def on_command_error(self, ctx, error):
-    #    print(f"Error: {error}")
 
 async def setup(client):
     await client.add_cog(TicTacToe(client))
