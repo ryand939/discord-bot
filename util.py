@@ -37,12 +37,24 @@ async def get_last_img(ctx, range):
 
 
 # sends a Pillow Image obj in discord chat
-async def send_img(ctx, img, ext):
+async def send_PIL_img(ctx, img, ext):
+        return await ctx.channel.send(file=PIL_img_to_file(ctx, img, ext))
+
+
+# converts pil image to discord sendable file
+async def PIL_img_to_file(ctx, img, ext):
         bytes = BytesIO()
         img.save(bytes, format=ext)
         bytes.seek(0)
-        file = discord.File(fp=bytes, filename='image.png')
-        await ctx.channel.send(file=file)
+        return discord.File(fp=bytes, filename='image.png')
+
+
+# get ID of last bot message in range
+async def get_bot_message(ctx, range):
+    async for message in ctx.channel.history(limit=range):
+        if message.author == ctx.me:
+            return message
+    return None
 
 
 # gets json data from a url

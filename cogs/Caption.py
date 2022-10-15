@@ -32,7 +32,7 @@ class Caption(commands.Cog, description="caption commands"):
                 capImg = cap_gen.multiline_caption(img, newInput[0].strip())
             else:
                 capImg = cap_gen.multiline_caption(img, newInput[0].strip(), newInput[1].strip())
-            await util.send_img(ctx, capImg, ext)
+            await ctx.channel.send(file=await util.PIL_img_to_file(ctx, img, ext)) 
 
 
 async def setup(client):

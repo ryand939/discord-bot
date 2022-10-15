@@ -33,7 +33,7 @@ class DonutHypeman(commands.Cog, description="donut utilities", name="DonutHypem
         if rtnStr is None:
             shuffle(self.quotes)
             self.quotesIter = iter(self.quotes)
-            rtnStr = next(self.quotesIter, None)
+            rtnStr = next(self.quotesIter, None) 
 
         rtnStr = f"\"{rtnStr}\"\n-DonutSandwich01"
         await ctx.send(rtnStr)

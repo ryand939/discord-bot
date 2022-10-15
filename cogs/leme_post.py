@@ -66,7 +66,7 @@ class LemePost(commands.Cog, description="Leme pics and more"):
         if ext == -1: return 0
         cap_gen = caption_generator.CaptionGenerator("./impact.ttf")
         capImg = cap_gen.multiline_caption(img, "THIS IS LEME")
-        await util.send_img(ctx, capImg, ext)
+        await ctx.channel.send(file=await util.PIL_img_to_file(ctx, capImg, ext)) 
 
 
 
