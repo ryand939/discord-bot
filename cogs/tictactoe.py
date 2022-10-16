@@ -99,8 +99,8 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
         # check if there is an active game on the guild
         game = self.get_game(ctx)
         if game is not None and (game[1] == player or game[2] == player):
-            self.activeGameList.remove(game)
             game[6].cancel()
+            self.activeGameList.remove(game)
         
 
     # refreshes the embed at the end of a new move
