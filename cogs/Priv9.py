@@ -1,6 +1,7 @@
 import os
 import discord
 from help import CustomHelpCommand
+import util
 from discord.ext import commands
 import datetime
 
@@ -16,6 +17,7 @@ class Priv9(commands.Cog, description="priv9 commands"):
         for file in os.listdir("./resources/priv9"):
             if file.endswith(".gif"):
                 self.adList.append(file)
+
 
 
     @commands.group(name='priv9')

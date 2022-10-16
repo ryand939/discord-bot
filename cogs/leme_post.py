@@ -17,6 +17,7 @@ class LemePost(commands.Cog, description="Leme pics and more"):
                          "https://randomfox.ca/floof/",                 # lemeList[1] - FOX
                          "https://dog.ceo/api/breeds/image/random",# lemeList[2] - DOG
                          "https://random-d.uk/api/random",]
+        self.captionGenerator = caption_generator.CaptionGenerator("./resources/fonts/impact.ttf")
 
 
     @commands.group(name='leme')
@@ -33,7 +34,9 @@ class LemePost(commands.Cog, description="Leme pics and more"):
     async def new(self, ctx):
         randnum = randrange(len(self.lemeList))
         if randnum == 0: await self.cat(ctx)
-        else: await self.fox(ctx)
+        elif randnum == 1: await self.fox(ctx)
+        elif randnum == 2: await self.dog(ctx)
+        else: await self.duck(ctx)
 
 
     @leme.command(name="cat", description="Lemes that look like cats.")
@@ -60,13 +63,6 @@ class LemePost(commands.Cog, description="Leme pics and more"):
         await ctx.send(data['image'])
 
 
-    @leme.command(name="this", description="This is leme.")
-    async def this(self, ctx):
-        img, ext = await util.get_last_img(ctx, 6) 
-        if ext == -1: return 0
-        cap_gen = caption_generator.CaptionGenerator("./impact.ttf")
-        capImg = cap_gen.multiline_caption(img, "THIS IS LEME")
-        await ctx.channel.send(file=await util.PIL_img_to_file(ctx, capImg, ext)) 
 
 
 

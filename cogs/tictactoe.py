@@ -1,20 +1,21 @@
 
 from help import CustomHelpCommand
 from discord.ext import commands, tasks
-from util import PIL_img_to_file
+from util import PIL_img_to_file, get_url_for_image
 from tic_tac_toe.tic_tac_toe_logic import TicTacToeLogic
+from discord import Embed
 
 class TicTacToe(commands.Cog, description="tictactoe commands"):
 
 
     def __init__(self, client):
-        #               [0]       [1]        [2]          [3]             [4]        [5]     [6]
-        # format ex: ["guild", player1ID, player2ID, TicTacToeLogic, gamemessage, complete, task]
+        #               [0]       [1]        [2]          [3]             [4]             [5]            [6]
+        # format ex: ["guild", player1ID, player2ID, TicTacToeLogic, gameChatMessage, completeBool, timeoutTask]
         self.activeGameList = []
         self.client = client
         self.inputToCords = {'1' : (0, 0), '2' : (1, 0), '3' : (2, 0), 
-                            '4' : (0, 1), '5' : (1, 1), '6' : (2, 1), 
-                            '7' : (0, 2), '8' : (1, 2), '9' : (2, 2)}
+                             '4' : (0, 1), '5' : (1, 1), '6' : (2, 1), 
+                             '7' : (0, 2), '8' : (1, 2), '9' : (2, 2)}
 
 
     @commands.group(name='ttt')
@@ -27,69 +28,74 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
             await helpObj.send_group_help(next(groupObj))
 
 
+    # user command to make a TTT move
     @ttt.command(name="move", description="Place an X or O on the board at pos[1-9] inclusive.")
     async def move(self, ctx, pos):
-
-        #convert pos to x y
-        x, y = self.inputToCords[pos]
-
-
-        player = str(ctx.author)
-        playerName = player[:-5]
-        msg = ctx.message
-        # check if there is an active game on the guild
-        game = self.get_game(ctx, True)
-
-        # found the game
-        # check if author is player1
-        if game[1] == player and game[3].can_make_move("x"):
-            # game host making move
+        x, y = self.inputToCords[pos]      # convert pos to x y
+        player = str(ctx.author)           # player names are stored name#0000
+        playerName = player[:-5]           # player names are displayed without tag
+        game = self.get_game(ctx, True)    # find the game or create new
+        
+        await ctx.message.delete()
+        # case author is player 1
+        if game[1] == player and game[3].can_make_move("x") and game[3].get_tile(x, y) is None:
             if game[3].player_move(x, y, "x"):
+                game[4].embeds[0].set_field_at(0, name="Winner", value=f"```{playerName}```")
+                game[4].embeds[0].set_field_at(1, name="Loser", value=f"```{game[2][:-5]}```")
                 await self.game_over(ctx, game, f"{playerName} wins!")
                 game[5] = True
-            await msg.delete()
-        elif game[2] == player and game[3].can_make_move("o"):
-            # 2nd host making move
+        # case author is player 2
+        elif game[2] == player and game[3].can_make_move("o") and game[3].get_tile(x, y) is None:
             if game[3].player_move(x, y, "o"):
+                game[4].embeds[0].set_field_at(0, name="Winner", value=f"```{playerName}```")
+                game[4].embeds[0].set_field_at(1, name="Loser", value=f"```{game[1][:-5]}```")
                 await self.game_over(ctx, game, f"{playerName} wins!")
                 game[5] = True
-            await msg.delete()
-        elif game[2] == "" and game[1] != player:
-            # 2nd player not found yet, set 2nd player
+        # case no player 2, author is now player 2
+        elif game[2] == "" and game[1] != player and game[3].get_tile(x, y) is None:
             game[2] = player
-            await game[4].edit(content=f"TicTacToe: {game[1][:-5]} vs. {playerName}")
+            game[4].embeds[0].set_field_at(1, name="Player 2", value=f"```{playerName}```")
+            game[4].embeds[0].set_footer(text=f"Command: {ctx.bot.command_prefix}ttt move {{number}}")
             if game[3].player_move(x, y, "o"):
                 await self.game_over(ctx, game, f"{playerName} wins!")
                 game[5] = True
-            await msg.delete()
+        # case author is not player 1/2, do nothing
         else:
             return
+        # move completed, check fullness of board
         if game[3].board_full() and game[5] != True:
             await self.game_over(ctx, game, f"{game[1][:-5]} and {game[2][:-5]} tied!")
-
+        # update gameMessage embed
         await self.update_visual(ctx, game[3].boardVisual.boardImage, game)
         
-
+        
+    # user command to quit/end the current game
     @ttt.command(name="quit", description="Ends the current game you are playing.")
     async def quit(self, ctx):
         player = str(ctx.author)
-        # check if there is an active game on the guild
+        # get the current active game if it exists
         game = self.get_game(ctx)
+        # confirm author is one of the two players, then quit
         if game is not None and (game[1] == player or game[2] == player):
-            await game[4].edit(content=f"TicTacToe: Game over, {str(ctx.author)[:-5]} quit.")
+            game[4].embeds[0].insert_field_at(0, name="Game over", value=f"{str(ctx.author)[:-5]} quit.", inline=False)
+            await game[4].edit(embed=game[4].embeds[0])
             game[6].cancel()
             self.activeGameList.remove(game)
 
 
+    # this function gets ran on a loop seconds=300 iterations=2
+    # once the first iteration completes, the second is cancelled immediately and the game is ended
+    # so in effect its a 300s timeout
     async def timeout(self, ctx, game):
         if game[6].current_loop == 1:
             await self.game_over(ctx, game, f"time ran out.")
 
 
+    # method to end a game with a given reason
     async def game_over(self, ctx, game, reason):
         player = str(ctx.author)
-        rsnStr = f"TicTacToe: Game over, " + reason
-        await game[4].edit(content=rsnStr)
+        game[4].embeds[0].insert_field_at(0, name="Game over", value=reason, inline=False)
+        await game[4].edit(embed=game[4].embeds[0])
         # check if there is an active game on the guild
         game = self.get_game(ctx)
         if game is not None and (game[1] == player or game[2] == player):
@@ -97,19 +103,26 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
             game[6].cancel()
         
 
+    # refreshes the embed at the end of a new move
     async def update_visual(self, ctx, img, game):
         if game[4] is None:
-            game[4] = await ctx.send(f"TicTacToe: {str(ctx.author)[:-5]} has started a new game. Anyone can make a move to join!")
-        await game[4].add_files(await PIL_img_to_file(ctx, game[3].boardVisual.boardImage, "png"))
+            gameEmbed = Embed(title="TicTacToe", color=0x3897f0)
+            gameEmbed.add_field(name="Player 1", value=f"```{str(ctx.author)[:-5]}```", inline=True)
+            gameEmbed.add_field(name="Player 2", value="```Empty```", inline=True)
+            gameEmbed.set_footer(text=f"Type {ctx.bot.command_prefix}ttt move {{number}} to join the game! ")
+            gameEmbed.set_image(url=await get_url_for_image(ctx, await PIL_img_to_file(ctx, game[3].boardVisual.boardImage, "PNG")))
+            game[4] = await ctx.send(embed=gameEmbed)
+        else:
+            game[4].embeds[0].set_image(url=await get_url_for_image(ctx, await PIL_img_to_file(ctx, game[3].boardVisual.boardImage, "PNG")))
+            await game[4].edit(embed=game[4].embeds[0])
         
 
-
+    # gets the current game in the guild
+    # optional boolean to create a game if none is found
     def get_game(self, ctx, create=False):
-        # check if there is an active game on the guild
         for game in self.activeGameList:
             if game[0] == ctx.guild:
                 return game
-        # game DNE, create one and get it
         if create:
             self.create_game(ctx)
             return self.get_game(ctx)
@@ -117,6 +130,7 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
             return None
 
 
+    # creates a new game for a guild, and adds it's info to the activeGameList
     def create_game(self, ctx):
         timeoutTask = tasks.loop(seconds=300, count=2)(self.timeout)
         self.activeGameList.append([ctx.guild, str(ctx.author), "", TicTacToeLogic(), None, False, timeoutTask])

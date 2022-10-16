@@ -6,7 +6,7 @@ class VisualBoard:
     def __init__(self):
         # got the board image from google images
         self.boardImage = Image.open("./resources/tictactoe/board_label.png")
-        self.font = ImageFont.truetype(font="./cour.ttf", size=200)
+        self.font = ImageFont.truetype(font="./resources/fonts/cour.ttf", size=200)
         self.draw = ImageDraw.Draw(self.boardImage)
 
 
