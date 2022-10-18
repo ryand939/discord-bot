@@ -44,10 +44,9 @@ class ThisImage(commands.Cog, description="preset image editor"):
             height = 430
             cv2_img = cv2_img[0:height, 0:width]    
         
-        offsetx1, offsety1 = self.get_offset_cords(23, 84, 265, 64, (430/2) - (height/2), 37, 430)
-        offsetx2, offsety2 = self.get_offset_cords(23, 84, 265, 64, (430/2) + (height/2), 37, 430)
+        offsetx1, offsety1 = self.get_offset_cords((430/2) - (height/2), 37, 430)
+        offsetx2, offsety2 = self.get_offset_cords((430/2) + (height/2), 37, 430)
 
-        
         transform_pt = numpy.float32([[23 + offsetx1, 84 + offsety1],     # top left
                                       [265 + offsetx1, 64 + offsety1],    # top right
                                       [23 + offsetx2, 84 + offsety2],     # bottom left
@@ -57,29 +56,16 @@ class ThisImage(commands.Cog, description="preset image editor"):
                                      [width, 0],         # top right
                                      [0, height],        # bottom left
                                      [width, height]])   # bottom right
+
         matrix = cv2.getPerspectiveTransform(original_pt, transform_pt)
-        warpedImg = cv2.warpPerspective(cv2_img, matrix, (680, 593))
-
-        # fix if image doesnt have an alpha channel
-        # get the rgb channel for the image
-        b_channel, g_channel, r_channel = cv2.split(warpedImg)[:3]
-        # create a dummy alpha channel
-        alpha_channel = numpy.ones(b_channel.shape, dtype=b_channel.dtype) * 50
-        # merge the 3 channels and dummy alpha channel, now this image has an alpha channel!
-        warpedImg = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
-
-        trans_mask = warpedImg[:,:,3] == 0
-        warpedImg[trans_mask] = [255, 255, 255, 255]
-        finalImg = cv2.cvtColor(warpedImg, cv2.COLOR_BGRA2BGR)
-        PILImg = Image.fromarray(finalImg)
+        warpedImg = cv2.warpPerspective(cv2_img, matrix, self.soyPhoneImage.size)
+        PILImg = Image.fromarray(warpedImg)
         PILImg.paste(self.soyPhoneImage, (0, 0), self.soyPhoneImage)
         await util.send_PIL_img(ctx, PILImg, ext)
 
 
-    def get_offset_cords(self, x1, y1, x2, y2, hypotenuse, adjacentSide, oppositeSide):
-        deltax = x2 - x1
-        deltay = y2 - y1
-        angle = numpy.tan(adjacentSide/oppositeSide)
+    def get_offset_cords(self, hypotenuse, oppositeSide, adjacentSide):
+        angle = numpy.tan(oppositeSide/adjacentSide)
         offsetx = numpy.sin(angle)*hypotenuse
         offsety = numpy.cos(angle)*hypotenuse
         return offsetx, offsety

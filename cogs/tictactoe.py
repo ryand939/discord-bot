@@ -66,7 +66,7 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
         if game[3].board_full() and game[5] != True:
             await self.game_over(ctx, game, f"{game[1][:-5]} and {game[2][:-5]} tied!")
         # update gameMessage embed
-        await self.update_visual(ctx, game[3].boardVisual.boardImage, game)
+        await self.update_visual(ctx, game)
         
         
     # user command to quit/end the current game
@@ -104,7 +104,7 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
         
 
     # refreshes the embed at the end of a new move
-    async def update_visual(self, ctx, img, game):
+    async def update_visual(self, ctx, game):
         if game[4] is None:
             gameEmbed = Embed(title="TicTacToe", color=0x3897f0)
             gameEmbed.add_field(name="Player 1", value=f"```{str(ctx.author)[:-5]}```", inline=True)
@@ -130,11 +130,12 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
             return None
 
 
-    # creates a new game for a guild, and adds it's info to the activeGameList
+    # creates a new game for a guild, and adds its info to the activeGameList
     def create_game(self, ctx):
         timeoutTask = tasks.loop(seconds=300, count=2)(self.timeout)
         self.activeGameList.append([ctx.guild, str(ctx.author), "", TicTacToeLogic(), None, False, timeoutTask])
         self.activeGameList[-1][6].start(ctx, self.activeGameList[-1])
+
 
 
 async def setup(client):
