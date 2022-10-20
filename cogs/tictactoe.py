@@ -67,6 +67,21 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
             await self.game_over(ctx, game, f"{game[1][:-5]} and {game[2][:-5]} tied!")
         # update gameMessage embed
         await self.update_visual(ctx, game)
+
+    
+    # user command to resend the game message in chat
+    # useful when the message gets too far up the message feed
+    @ttt.command(name="resend", description="Resend game board in chat.")
+    async def resend(self, ctx):
+        game = self.get_game(ctx)   # get the game in the guild
+        player = str(ctx.author)
+        # confirm author is one of the two players, then delete current game board and send it again
+        if game is not None and (game[1] == player or game[2] == player):
+            saveEmbed = game[4].embeds[0]
+            await game[4].delete()
+            game[4] = await ctx.send(embed=saveEmbed)
+            
+
         
         
     # user command to quit/end the current game
@@ -115,6 +130,7 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
         else:
             game[4].embeds[0].set_image(url=await get_url_for_image(ctx, await PIL_img_to_file(ctx, game[3].boardVisual.boardImage, "PNG")))
             await game[4].edit(embed=game[4].embeds[0])
+
         
 
     # gets the current game in the guild

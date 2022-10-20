@@ -30,7 +30,8 @@ class ThisImage(commands.Cog, description="preset image editor"):
     async def leme(self, ctx):
         img, ext = await util.get_last_img(ctx, 6) 
         if ext == -1: return 0
-        capImg = self.captionGenerator.multiline_caption(img, "THIS IS LEME")
+        RGBImg = img.convert('RGB')
+        capImg = self.captionGenerator.multiline_caption(RGBImg, "THIS IS LEME")
         await ctx.channel.send(file=await util.PIL_img_to_file(ctx, capImg, ext)) 
 
     @this.command(name="soyphone", description="Soyphone reaction.")
@@ -59,7 +60,8 @@ class ThisImage(commands.Cog, description="preset image editor"):
 
         matrix = cv2.getPerspectiveTransform(original_pt, transform_pt)
         warpedImg = cv2.warpPerspective(cv2_img, matrix, self.soyPhoneImage.size)
-        PILImg = Image.fromarray(warpedImg)
+        finalImg = cv2.cvtColor(warpedImg, cv2.COLOR_BGRA2BGR)
+        PILImg = Image.fromarray(finalImg)
         PILImg.paste(self.soyPhoneImage, (0, 0), self.soyPhoneImage)
         await util.send_PIL_img(ctx, PILImg, ext)
 
