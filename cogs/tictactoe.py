@@ -1,5 +1,5 @@
 
-from help import CustomHelpCommand
+from help import invoke_group_help
 from discord.ext import commands, tasks
 from util import PIL_img_to_file, get_url_for_image
 from tic_tac_toe.tic_tac_toe_logic import TicTacToeLogic
@@ -21,15 +21,11 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
     @commands.group(name='ttt')
     async def ttt(self, ctx):
         if ctx.invoked_subcommand is None:
-            # get the group and methods of this cog
-            groupObj = ctx.cog.walk_commands()
-            helpObj = CustomHelpCommand()
-            helpObj.context = ctx
-            await helpObj.send_group_help(next(groupObj))
+            await invoke_group_help(ctx.cog.walk_commands(), ctx)
 
 
     # user command to make a TTT move
-    @ttt.command(name="move", description="Place an X or O on the board at pos[1-9] inclusive.")
+    @ttt.command(name="move", description="Make a move at pos[1-9].")
     async def move(self, ctx, pos):
         x, y = self.inputToCords[pos]      # convert pos to x y
         player = str(ctx.author)           # player names are stored name#0000
@@ -71,7 +67,7 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
     
     # user command to resend the game message in chat
     # useful when the message gets too far up the message feed
-    @ttt.command(name="resend", description="Resend game board in chat.")
+    @ttt.command(name="resend", description="Resend game in chat.")
     async def resend(self, ctx):
         game = self.get_game(ctx)   # get the game in the guild
         player = str(ctx.author)
@@ -85,7 +81,7 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
         
         
     # user command to quit/end the current game
-    @ttt.command(name="quit", description="Ends the current game you are playing.")
+    @ttt.command(name="quit", description="Ends the current game.")
     async def quit(self, ctx):
         player = str(ctx.author)
         # get the current active game if it exists

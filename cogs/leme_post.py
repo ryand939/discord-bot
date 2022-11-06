@@ -1,7 +1,7 @@
 from random import randrange
 import caption_generator
 from discord.ext import commands
-from help import CustomHelpCommand
+from help import invoke_group_help
 import util
 
 
@@ -16,21 +16,17 @@ class LemePost(commands.Cog, description="Leme pics and more"):
         self.lemeList = ["https://api.thecatapi.com/v1/images/search", # lemeList[0] - CAT
                          "https://randomfox.ca/floof/",                 # lemeList[1] - FOX
                          "https://dog.ceo/api/breeds/image/random",# lemeList[2] - DOG
-                         "https://random-d.uk/api/random",]
+                         "https://random-d.uk/api/random"]
         self.captionGenerator = caption_generator.CaptionGenerator("./resources/fonts/impact.ttf")
 
 
     @commands.group(name='leme')
     async def leme(self, ctx):
         if ctx.invoked_subcommand is None:
-            # get the group and methods of this cog
-            h = ctx.cog.walk_commands()
-            helpObj = CustomHelpCommand()
-            helpObj.context = ctx
-            await helpObj.send_group_help(next(h))
+            await invoke_group_help(ctx.cog.walk_commands(), ctx)
 
 
-    @leme.command(name="new", description="New randomly generated leme.")
+    @leme.command(name="new", description="Random leme.")
     async def new(self, ctx):
         randnum = randrange(len(self.lemeList))
         if randnum == 0: await self.cat(ctx)
@@ -39,25 +35,25 @@ class LemePost(commands.Cog, description="Leme pics and more"):
         else: await self.duck(ctx)
 
 
-    @leme.command(name="cat", description="Lemes that look like cats.")
+    @leme.command(name="cat", description="Leme cat.")
     async def cat(self, ctx):
         data = await util.get_json_from_url(self.lemeList[0])
         await ctx.send(data[0]['url'])
 
 
-    @leme.command(name="dog", description="Lemes that look like dogs.")
+    @leme.command(name="dog", description="Leme dog.")
     async def dog(self, ctx):
         data = await util.get_json_from_url(self.lemeList[2])
         await ctx.send(data['message'])
 
 
-    @leme.command(name="duck", description="Lemes that look like ducks.")
+    @leme.command(name="duck", description="Leme duck.")
     async def duck(self, ctx):
         data = await util.get_json_from_url(self.lemeList[3])
         await ctx.send(data['url'])
 
 
-    @leme.command(name="fox", description="Lemes that look like foxes.")
+    @leme.command(name="fox", description="Leme fox.")
     async def fox(self, ctx):
         data = await util.get_json_from_url(self.lemeList[1])
         await ctx.send(data['image'])

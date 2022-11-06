@@ -7,7 +7,7 @@ class CustomHelpCommand(commands.HelpCommand):
     def __init__(self):
         super().__init__()
 
-
+    # simple help command output
     async def send_bot_help(self, mapping):
         rtnStr = "daerbot commands\n"
         for cog in mapping:
@@ -38,3 +38,7 @@ class CustomHelpCommand(commands.HelpCommand):
         return await super().send_command_help(command)
 
 
+async def invoke_group_help(cog, ctx):
+    helpObj = CustomHelpCommand()
+    helpObj.context = ctx
+    await helpObj.send_group_help(next(cog))

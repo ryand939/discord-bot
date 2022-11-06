@@ -1,5 +1,5 @@
 import caption_generator
-from help import CustomHelpCommand
+from help import invoke_group_help
 from discord.ext import commands
 from PIL import Image
 import util
@@ -19,11 +19,7 @@ class ThisImage(commands.Cog, description="preset image editor"):
     @commands.group(name='this')
     async def this(self, ctx):
         if ctx.invoked_subcommand is None:
-            # get the group and methods of this cog
-            groupObj = ctx.cog.walk_commands()
-            helpObj = CustomHelpCommand()
-            helpObj.context = ctx
-            await helpObj.send_group_help(next(groupObj))
+            await invoke_group_help(ctx.cog.walk_commands(), ctx)
 
 
     @this.command(name="leme", description="This is leme.")

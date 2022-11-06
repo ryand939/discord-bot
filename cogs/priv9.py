@@ -1,6 +1,6 @@
 import os
 import discord
-from help import CustomHelpCommand
+from help import invoke_group_help
 import util
 from discord.ext import commands
 import datetime
@@ -23,25 +23,21 @@ class Priv9(commands.Cog, description="priv9 commands"):
     @commands.group(name='priv9')
     async def priv9(self, ctx):
         if ctx.invoked_subcommand is None:
-            # get the group and methods of this cog
-            groupObj = ctx.cog.walk_commands()
-            helpObj = CustomHelpCommand()
-            helpObj.context = ctx
-            await helpObj.send_group_help(next(groupObj))
+            await invoke_group_help(ctx.cog.walk_commands(), ctx)
 
 
-    @priv9.command(name="eta", description="Official time until priv9 drops.")
+    @priv9.command(name="eta", description="Time until priv9 drops.")
     async def eta(self, ctx):
-        releaseDate = datetime.datetime(2022, 12, 25) - datetime.datetime.now()
+        releaseDate = datetime.datetime(2022, 11, 24) - datetime.datetime.now()
         minutes = releaseDate.seconds // 60
         hours = minutes // 60
         minutes = minutes % 60
         seconds = releaseDate.seconds % 60
-        send = f"Priv9 will release in {releaseDate.days} days, {hours} hours, {minutes} minutes, {seconds} seconds"
+        send = f"Priv9 will release in {releaseDate.days} days, {hours} hours, {minutes} minutes, and {seconds} seconds"
         await ctx.send(send)
 
 
-    @priv9.command(name="ad", description="Send the next priv9 advertisement.")
+    @priv9.command(name="ad", description="Send the next priv9 ad.")
     async def ad(self, ctx):
         # a circular linked list would be really nice here
         #
