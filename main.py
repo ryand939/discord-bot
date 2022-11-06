@@ -8,7 +8,12 @@ from on_message import handle_on_message
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-client = commands.Bot(command_prefix='##', intents=discord.Intents.all(), help_command=CustomHelpCommand())
+prefix = ">"
+
+client = commands.Bot(command_prefix = prefix, 
+                      intents        = discord.Intents.all(), 
+                      help_command   = CustomHelpCommand(),
+                      activity       = discord.Activity(type=discord.ActivityType.watching, name=f"for {prefix}"))
 
 
 @client.event

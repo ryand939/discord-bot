@@ -4,6 +4,7 @@ from help import invoke_group_help
 import util
 from discord.ext import commands
 import datetime
+from itertools import cycle
 
 
 class Priv9(commands.Cog, description="priv9 commands"):
@@ -12,11 +13,11 @@ class Priv9(commands.Cog, description="priv9 commands"):
     def __init__(self, cli):
         self.cli = cli
         # load the priv9 ads
-        self.adList = []
-        self.index = 0
+        adList = []
         for file in os.listdir("./resources/priv9"):
             if file.endswith(".gif"):
-                self.adList.append(file)
+                adList.append(file)
+        self.imgPool = cycle(adList)
 
 
 
@@ -39,14 +40,7 @@ class Priv9(commands.Cog, description="priv9 commands"):
 
     @priv9.command(name="ad", description="Send the next priv9 ad.")
     async def ad(self, ctx):
-        # a circular linked list would be really nice here
-        #
-        # TODO: IMPLEMENT LINKED LIST!!
-
-        if self.index >= len(self.adList):
-            self.index = 0
-        path = f"./resources/priv9/{self.adList[self.index]}"
-        self.index += 1
+        path = f"./resources/priv9/{next(self.imgPool)}"
         await ctx.send(file=discord.File(path))
 
 
