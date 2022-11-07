@@ -1,0 +1,45 @@
+{
+    "late_task": [
+      {
+        "Undoing changes":"The admins are attempting to get the project back to a working state.",
+        "Paying ransom":"The admins are waiting for their bitcoin transaction to go through so the hackers will decrypt their drives.",
+        "Formatting PC":"The admins contracted a computer virus and all drives must be wiped. The priv9 source code has been lost but the recode will begin tomorrow. Donations are appreciated."
+      }
+    ],
+    "sleep_task": [
+      {
+        "Sleeping":"The admins are getting some shut-eye and dreaming about what they will code tomorrow.",
+        "Nightmare":"The admins are currently having nightmares and are losing valuable sleep. Don't expect a lot to get done tomorrow.",
+        "Dreaming in code":"The admins are currently group-lucid-dreaming to fix an annoying bug."
+      }
+    ],
+    "work_task": [
+      {
+        "Gettin' shit done.":"The admins are working hard to bring their users the best rust features.",
+        "Coding overtime":"The admins are working their asses off. ETA is looking like next week, pre-orders will get an extra 5 days on their sub.",
+        "Coding till the wheels fall off":"The admins just can't stop coding. The cheat might be up by the end of the day, but only those who pre-ordered will get day-one access.",
+        "Pockets feeling light":"The admins would normally be working on the cheat right now, but can't afford to keep the server running. Don't waste time, donate immediately."
+      }
+    ],
+    "morning_task": [
+      {
+        "Good morning world!":"The admins are just waking up and enjoying a cup of coffee.",
+        "Eating breakfast":"The admins are enjoying breakfast together and getting ready for a productive day.",
+        "Not feelin' it.":"The admins woke up on the wrong side of the bed. DM fees have been doubled to $20/dm and a response is not guaranteed"
+      }
+    ],
+    "dinner_task": [
+      {
+        "Eating dinner":"The admins are currently eating dinner.",
+        "Refuelling":"The admins are currently stuffing their faces at a buffet. Thank you all for the donations."
+      }
+    ],
+    "break_task": [
+      {
+        "Admins taking a quick break":"The admins are focusing on their mental health and they're taking a second to unwind.",
+        "Admins taking a coffee break":"The admins are taking a minute to brew up some coffee and recharge.",
+        "Admins taking a well deserved break":"The admins have been working tremendously hard and are taking a break.",
+        "Shopping spree!":"The admins are getting rewarded for all their hard work. Without your donations this wouldn't have been possible."
+      }
+    ]
+  }

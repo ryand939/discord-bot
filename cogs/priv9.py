@@ -5,6 +5,8 @@ import util
 from discord.ext import commands
 import datetime
 from itertools import cycle
+from resources.priv9.priv9_dev_schedule import Task
+from discord import Embed
 
 
 class Priv9(commands.Cog, description="priv9 commands"):
@@ -14,10 +16,12 @@ class Priv9(commands.Cog, description="priv9 commands"):
         self.cli = cli
         # load the priv9 ads
         adList = []
-        for file in os.listdir("./resources/priv9"):
+        for file in os.listdir("./resources/priv9/ad_media"):
             if file.endswith(".gif"):
                 adList.append(file)
         self.imgPool = cycle(adList)
+        self.devTask = Task()
+
 
 
 
@@ -40,8 +44,18 @@ class Priv9(commands.Cog, description="priv9 commands"):
 
     @priv9.command(name="ad", description="Send the next priv9 ad.")
     async def ad(self, ctx):
-        path = f"./resources/priv9/{next(self.imgPool)}"
+        path = f"./resources/priv9/ad_media/{next(self.imgPool)}"
         await ctx.send(file=discord.File(path))
+
+
+    @priv9.command(name="status", description="Track priv9 dev activity.")
+    async def status(self, ctx, footer=None):
+        status, desc, time = self.devTask.get_current_task()
+        gameEmbed = Embed(title=f"PRIV9 DEV STATUS: {status}", description=desc, color=0x3897f0)
+        if footer == "-n":
+            gameEmbed.set_footer(text=f"Next task in {int(time)} minutes")
+
+        await ctx.send(embed=gameEmbed)
 
 
 async def setup(client):
