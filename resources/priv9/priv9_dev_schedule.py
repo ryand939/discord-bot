@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import json
 from random import randrange
 
@@ -21,28 +21,23 @@ class Task():
     def get_specific_task(self):
         hour = self.startTime.hour
 
-        if hour < 2:                           # 0 - 1
-            return self.get_task("late_task")
-        elif hour < 10:                        # 2 - 9
-            return self.get_task("sleep_task")
-        elif hour < 14:                        # 10 - 13
-            return self.get_task("morning_task")
-        elif hour < 16:                        # 14 - 15
-            return self.get_task("work_task")
-        elif hour < 18:                        # 16 - 17
-            return self.get_task("break_task")
-        elif hour < 20:                        # 18 - 19
-            return self.get_task("dinner_task")
-        elif hour < 22:                        # 20 - 21
-            return self.get_task("work_task")
-        elif hour <= 23:                       # 22 - 23
-            return self.get_task("break_task")
+        # at any given moment of the day these are the tasks i want active
+        if hour < 4:     return self.get_task("late_task")      # HOURS 0 - 3   
+        elif hour < 11:  return self.get_task("sleep_task")     # HOURS 4 - 10  
+        elif hour < 13:  return self.get_task("morning_task")   # HOURS 11 - 12  
+        elif hour == 13: return self.get_task("break_task")     # HOUR  13      
+        elif hour < 16:  return self.get_task("work_task")      # HOURS 14 - 15  
+        elif hour == 16: return self.get_task("break_task")     # HOUR  16      
+        elif hour == 17: return self.get_task("work_task")      # HOUR  17      
+        elif hour < 20:  return self.get_task("dinner_task")    # HOURS 18 - 19
+        elif hour < 22:  return self.get_task("break_task")     # HOURS 20 - 21
+        elif hour <= 23: return self.get_task("work_task")      # HOURS 22 - 23
 
     def get_time_delta(self):
         targetHour = self.startTime.hour
         # get target time = next one of the following hours:
         # these are the hours i want the dev to have a new status
-        checkPoints = [0, 2, 4, 6, 8, 10, 14, 16, 18, 20, 22]
+        checkPoints = [0, 4, 6, 8, 11, 13, 14, 16, 17, 18, 20, 22]
         
         if checkPoints.count(targetHour) > 0:
             index = checkPoints.index(targetHour)
@@ -59,8 +54,8 @@ class Task():
         # if the target hour is 0, the target is the beginning of the next day
         if targetHour == 0:
             # add a day to the current time, then reset it's hour/min/sec with .min
-            tempDate = self.startTime + datetime.timedelta(days=1)
-            targetDelta = datetime.combine(tempDate, datetime.time.min) - self.startTime
+            tempDate = self.startTime + timedelta(days=1)
+            targetDelta = datetime.combine(tempDate, time.min) - self.startTime
         else:
             # replace the current time with the target hour, then get the delta
             tempDate = self.startTime.replace(hour=targetHour, minute=0)

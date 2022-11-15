@@ -9,6 +9,7 @@
     "sleep_task": [
       {
         "Sleeping":"The admins are getting some shut-eye and dreaming about what they will code tomorrow.",
+        "Sleeping independently":"The admins are sleeping in their own personal rooms in the San Francisco priv9 house. They are not sleeping in the same bed together but even if they were, I don't see why that would be a big deal.",
         "Nightmare":"The admins are currently having nightmares and are losing valuable sleep. Don't expect a lot to get done tomorrow.",
         "Dreaming in code":"The admins are currently group-lucid-dreaming to fix an annoying bug."
       }
@@ -17,7 +18,9 @@
       {
         "Gettin' shit done.":"The admins are working hard to bring their users the best rust features.",
         "Coding overtime":"The admins are working their asses off. ETA is looking like next week, pre-orders will get an extra 5 days on their sub.",
+        "Studying":"The admins are browsing GuidedHacking and learning how to hack any game with cheat engine.",
         "Coding till the wheels fall off":"The admins just can't stop coding. The cheat might be up by the end of the day, but only those who pre-ordered will get day-one access.",
+        "Considering plan B":"The admins are debating whether or not they should even continue this project and have decided to create a poll to determine the future of priv9. You may vote in this poll by making a $10 F&F payment to the priv9 paypal with your vote in the message.",
         "Pockets feeling light":"The admins would normally be working on the cheat right now, but can't afford to keep the server running. Don't waste time, donate immediately."
       }
     ],
@@ -25,21 +28,25 @@
       {
         "Good morning world!":"The admins are just waking up and enjoying a cup of coffee.",
         "Eating breakfast":"The admins are enjoying breakfast together and getting ready for a productive day.",
+        "Up and at 'em":"The admins decided to cut the bullshit and really get down to work this morning. The backers should reward this behavior by sending unsolicited donations.",
         "Not feelin' it.":"The admins woke up on the wrong side of the bed. DM fees have been doubled to $20/dm and a response is not guaranteed"
       }
     ],
     "dinner_task": [
       {
-        "Eating dinner":"The admins are currently eating dinner.",
+        "Eating dinner":"The admins are currently eating dinner at a lovely restaurant and have agreed that the backers should split the bill. Each backer will pay $12.38 and this will be expected in your next priv9 donation. Thank you so much for your support and please send your donation immediately.",
+        "Fine dining":"The admins are enjoying dinner at The Casa Madera in Toronto Canada. The admins considered inviting the super-backers to join them but decided against it.",
         "Refuelling":"The admins are currently stuffing their faces at a buffet. Thank you all for the donations."
       }
     ],
     "break_task": [
       {
-        "Admins taking a quick break":"The admins are focusing on their mental health and they're taking a second to unwind.",
-        "Admins taking a coffee break":"The admins are taking a minute to brew up some coffee and recharge.",
-        "Admins taking a well deserved break":"The admins have been working tremendously hard and are taking a break.",
-        "Shopping spree!":"The admins are getting rewarded for all their hard work. Without your donations this wouldn't have been possible."
+        "Taking a quick break":"The admins are focusing on their mental health and they're taking a second to unwind.",
+        "Taking a coffee break":"The admins are taking a minute to brew up some coffee and recharge.",
+        "Taking a well deserved break":"The admins have been working tremendously hard and are taking a break.",
+        "Planning a vacation":"The admins are planning their backer-funded trip to Paris and want to remind all users that admin-criticism is a bannable offense. The admins have been planning this trip for a long time but have never had the money to go through with it. Don't be a buzzkill.",
+        "Shopping spree!":"The admins are getting rewarded for all their hard work. Without your donations this wouldn't have been possible.",
+        "Quick nap!":"The admins are taking a nap to boost their productivity for the rest of the day."
       }
     ]
   }
