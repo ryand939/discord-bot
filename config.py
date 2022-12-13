@@ -72,10 +72,3 @@ class BotConfig:
     
         
 
-
-cfg = BotConfig('./resources/storage/economy.json')
-cfg.set("69696969", "tester", -10, True)
-cfg.set("DEADBEEF", "entry", -100, True)
-cfg.set("DEADBEEF", "entry2", 400, True)
-print(cfg.max_key(69696969))
-print(cfg.sorted_list(69696969))
