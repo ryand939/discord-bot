@@ -11,8 +11,8 @@ import util
 class LemePost(commands.Cog, description="Leme pics and more"):
 
 
-    def __init__(self, cli):
-        self.cli = cli
+    def __init__(self, client):
+        self.client = client
         self.lemeList = ["https://api.thecatapi.com/v1/images/search", # lemeList[0] - CAT
                          "https://randomfox.ca/floof/",                 # lemeList[1] - FOX
                          "https://dog.ceo/api/breeds/image/random",# lemeList[2] - DOG
@@ -20,7 +20,7 @@ class LemePost(commands.Cog, description="Leme pics and more"):
         self.captionGenerator = caption_generator.CaptionGenerator("./resources/fonts/impact.ttf")
 
 
-    @commands.group(name='leme')
+    @commands.hybrid_group(name='leme')
     async def leme(self, ctx):
         if ctx.invoked_subcommand is None:
             await invoke_group_help(ctx.cog.walk_commands(), ctx)

@@ -18,7 +18,7 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
                              '7' : (0, 2), '8' : (1, 2), '9' : (2, 2)}
 
 
-    @commands.group(name='ttt')
+    @commands.hybrid_group(name='ttt')
     async def ttt(self, ctx):
         if ctx.invoked_subcommand is None:
             await invoke_group_help(ctx.cog.walk_commands(), ctx)
@@ -26,13 +26,14 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
 
     # user command to make a TTT move
     @ttt.command(name="move", description="Make a move at pos[1-9].")
-    async def move(self, ctx, pos):
+    async def move(self, ctx, pos: str):
         x, y = self.inputToCords[pos]      # convert pos to x y
         player = str(ctx.author)           # player names are stored name#0000
         playerName = player[:-5]           # player names are displayed without tag
         game = self.get_game(ctx, True)    # find the game or create new
         
-        await ctx.message.delete()
+        if ctx.interaction is None: 
+            await ctx.message.delete()
         # case author is player 1
         if game[1] == player and game[3].can_make_move("x") and game[3].get_tile(x, y) is None:
             if game[3].player_move(x, y, "x"):
@@ -75,7 +76,12 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
         if game is not None and (game[1] == player or game[2] == player):
             saveEmbed = game[4].embeds[0]
             await game[4].delete()
-            game[4] = await ctx.send(embed=saveEmbed)
+            
+            if ctx.interaction is not None:
+                await ctx.interaction.response.send_message(embed=saveEmbed)
+            else:
+                game[4] = await ctx.send(embed=saveEmbed)
+
             
 
         
@@ -89,7 +95,10 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
         # confirm author is one of the two players, then quit
         if game is not None and (game[1] == player or game[2] == player):
             game[4].embeds[0].insert_field_at(0, name="Game over", value=f"{str(ctx.author)[:-5]} quit.", inline=False)
-            await game[4].edit(embed=game[4].embeds[0])
+            if ctx.interaction is not None:
+                await self.resend(ctx)
+            else:
+                await game[4].edit(embed=game[4].embeds[0])
             game[6].cancel()
             self.activeGameList.remove(game)
 

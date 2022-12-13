@@ -42,7 +42,10 @@ async def get_last_img(ctx, range):
 
 # sends a Pillow Image obj in discord chat
 async def send_PIL_img(ctx, img, ext):
-        return await ctx.channel.send(file=await PIL_img_to_file(ctx, img, ext))
+        if ctx.interaction is not None:
+            await ctx.interaction.followup.send(file=await PIL_img_to_file(ctx, img, ext))
+        else:
+            await ctx.channel.send(file=await PIL_img_to_file(ctx, img, ext))
 
 
 # converts pil image to discord sendable file
@@ -90,4 +93,16 @@ def resize_img_cv2(img, width=None, height=None, inter = cv2.INTER_AREA):
         dimensions = (width, int(h * ratio))
     return  cv2.resize(img, dimensions, interpolation = inter)
 
+
+async def send_file(ctx, fileSend, msg=None):
+    if ctx.interaction is not None:
+        await ctx.interaction.followup.send(file=fileSend, content=msg)
+    else:
+        await ctx.send(file=fileSend, content=msg)
+
+async def send_message(ctx, msg):
+    if ctx.interaction is not None:
+        await ctx.interaction.followup.send(msg)
+    else:
+        await ctx.send(msg)
 

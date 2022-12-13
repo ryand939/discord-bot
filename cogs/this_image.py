@@ -1,5 +1,6 @@
 import caption_generator
 from help import invoke_group_help
+import discord
 from discord.ext import commands
 from PIL import Image
 import util
@@ -10,13 +11,13 @@ import numpy
 class ThisImage(commands.Cog, description="preset image editor"):
 
 
-    def __init__(self, cli):
-        self.cli = cli
+    def __init__(self, client):
+        self.client = client
         self.captionGenerator = caption_generator.CaptionGenerator("./resources/fonts/impact.ttf")
         self.soyPhoneImage = Image.open("./resources/this_image/soyphone.png")
 
 
-    @commands.group(name='this')
+    @commands.hybrid_group(name='this')
     async def this(self, ctx):
         if ctx.invoked_subcommand is None:
             await invoke_group_help(ctx.cog.walk_commands(), ctx)
@@ -24,6 +25,7 @@ class ThisImage(commands.Cog, description="preset image editor"):
 
     @this.command(name="leme", description="This is leme.")
     async def leme(self, ctx):
+        await ctx.interaction.response.defer()
         img, ext = await util.get_last_img(ctx, 6) 
         if ext == -1: return 0
         RGBImg = img.convert('RGB')
@@ -33,6 +35,7 @@ class ThisImage(commands.Cog, description="preset image editor"):
     @this.command(name="caption", description="Custom image caption.")
     async def new(self, ctx, *, input=None):
         if input is not None:
+            if ctx.interaction: await ctx.interaction.response.defer()
             newInput = input.split(":", 1)                  # get top text and bottom text from input=toptext:bottomtext
             img, ext = await util.get_last_img(ctx, 6)      # get the last image sent in chat and its file ext
             if ext == -1: return 0                          
@@ -40,10 +43,13 @@ class ThisImage(commands.Cog, description="preset image editor"):
                 capImg = self.captionGenerator.multiline_caption(img, newInput[0].strip())
             else:
                 capImg = self.captionGenerator.multiline_caption(img, newInput[0].strip(), newInput[1].strip())
-            await ctx.channel.send(file=await util.PIL_img_to_file(ctx, img, ext)) 
+            #await ctx.channel.send(file=await util.PIL_img_to_file(ctx, img, ext)) 
+            await util.send_PIL_img(ctx, img, ext)
+
 
     @this.command(name="soyphone", description="Soyphone reaction.")
     async def soyphone(self, ctx):
+        if ctx.interaction: await ctx.interaction.response.defer()
         img, ext = await util.get_last_img(ctx, 6)
         cv2_img = numpy.asarray(img)
         cv2_img = util.resize_img_cv2(cv2_img, width = 243)

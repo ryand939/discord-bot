@@ -12,8 +12,8 @@ from discord import Embed
 class Priv9(commands.Cog, description="priv9 commands"):
 
 
-    def __init__(self, cli):
-        self.cli = cli
+    def __init__(self, client):
+        self.client = client
         # load the priv9 ads
         adList = []
         for file in os.listdir("./resources/priv9/ad_media"):
@@ -25,7 +25,7 @@ class Priv9(commands.Cog, description="priv9 commands"):
 
 
 
-    @commands.group(name='priv9')
+    @commands.hybrid_group(name='priv9')
     async def priv9(self, ctx):
         if ctx.invoked_subcommand is None:
             await invoke_group_help(ctx.cog.walk_commands(), ctx)
@@ -39,21 +39,22 @@ class Priv9(commands.Cog, description="priv9 commands"):
         minutes = minutes % 60
         seconds = releaseDate.seconds % 60
         send = f"Priv9 will release in {releaseDate.days} days, {hours} hours, {minutes} minutes, and {seconds} seconds"
-        await ctx.send(send)
-
+        #await ctx.send(send)
+        await util.send_message(ctx, send)
 
     @priv9.command(name="ad", description="Send the next priv9 ad.")
     async def ad(self, ctx):
+        if ctx.interaction: await ctx.interaction.response.defer()
         path = f"./resources/priv9/ad_media/{next(self.imgPool)}"
-        await ctx.send(file=discord.File(path))
-
+        #await ctx.send(file=discord.File(path))
+        await util.send_file(ctx, fileSend=discord.File(path))
 
     @priv9.command(name="status", description="Track priv9 dev activity.")
-    async def status(self, ctx, footer=None):
+    async def status(self, ctx):
         status, desc, time = self.devTask.get_current_task()
         gameEmbed = Embed(title=f"PRIV9 DEV STATUS: {status}", description=desc, color=0x3897f0)
-        if footer == "-n":
-            gameEmbed.set_footer(text=f"Next task in {int(time)} minutes")
+        #if footer == "-n":
+            #gameEmbed.set_footer(text=f"Next task in {int(time)} minutes")
 
         await ctx.send(embed=gameEmbed)
 

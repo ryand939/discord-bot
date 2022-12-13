@@ -21,7 +21,7 @@ class Quote(commands.Cog, name="Quote"):
 
 
 
-    @commands.group(name='quote')
+    @commands.hybrid_group(name='quote')
     async def quote(self, ctx):
         if ctx.invoked_subcommand is None:
             await invoke_group_help(ctx.cog.walk_commands(), ctx)
