@@ -7,21 +7,22 @@ class BotConfig:
         self.filename = filename
 
 
-    def set(self, serverID: int, key: str, value: int, relative = False):
+    def set(self, serverID: str, key: str, value: int, relative = False):
+
         try:
             with open(self.filename,'r') as file:
                 file_data = json.load(file)
             
             with open(self.filename,'w') as file:
                 # server is known, add new dict key
-                if str(serverID) in file_data.keys():
-                    if key in file_data[str(serverID)].keys() and relative: 
-                        file_data[str(serverID)][key] += value
+                if serverID in file_data.keys():
+                    if key in file_data[serverID].keys() and relative: 
+                        file_data[serverID][key] += value
                     else: 
-                        file_data[str(serverID)][key] = value
+                        file_data[serverID][key] = value
                 # server never made key before, add new entry for server
                 else:
-                    file_data[str(serverID)] = {key: value}
+                    file_data[serverID] = {key: value}
                 # dump changes to json file
                 json.dump(file_data, file, indent = 4)
         except:
@@ -31,42 +32,42 @@ class BotConfig:
     
 
     # gets the value for a key in a given server if it exists
-    def get(self, serverID: int, key: str):
+    def get(self, serverID: str, key: str):
         try:
             with open(self.filename,'r') as file:
                 file_data = json.load(file)
-                return file_data[str(serverID)][key]
+                return file_data[serverID][key]
         except:
             return None
 
 
     # removes the setting entry for a server
-    def clear(self, serverID: int, key: str):
+    def clear(self, serverID: str, key: str):
         try:
             with open(self.filename,'r') as file:
                 file_data = json.load(file)
                 
             with open(self.filename,'w') as file:
-                del file_data[str(serverID)][key]
+                del file_data[serverID][key]
                 json.dump(file_data, file, indent = 4)
             return True
         except:
             return False
         
     # returns the highest key value for the server
-    def max_key(self, serverID: int):
+    def max_key(self, serverID: str):
         try:
             with open(self.filename, 'r') as file:
                 file_data = json.load(file)
-                return max(file_data[str(serverID)], key=file_data[str(serverID)].get)
+                return max(file_data[serverID], key=file_data[serverID].get)
         except:
             return None
     
-    def sorted_list(self, serverID: int):
+    def sorted_list(self, serverID: str):
         try:
             with open(self.filename, 'r') as file:
                 file_data = json.load(file)
-                return sorted(file_data[str(serverID)].items(), key=lambda points: points[1], reverse=True)
+                return sorted(file_data[serverID].items(), key=lambda points: points[1], reverse=True)
         except:
             return None
     

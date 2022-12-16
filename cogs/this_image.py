@@ -1,4 +1,4 @@
-import caption_generator
+from caption_generator import CaptionGenerator
 from help import invoke_group_help
 import discord
 from discord.ext import commands
@@ -13,7 +13,7 @@ class ThisImage(commands.Cog, description="preset image editor"):
 
     def __init__(self, client):
         self.client = client
-        self.captionGenerator = caption_generator.CaptionGenerator("./resources/fonts/impact.ttf")
+        self.captionGenerator = CaptionGenerator("./resources/fonts/impact.ttf")
         self.soyPhoneImage = Image.open("./resources/this_image/soyphone.png")
 
 
@@ -30,7 +30,7 @@ class ThisImage(commands.Cog, description="preset image editor"):
         if ext == -1: return 0
         RGBImg = img.convert('RGB')
         capImg = self.captionGenerator.multiline_caption(RGBImg, "THIS IS LEME")
-        await ctx.channel.send(file=await util.PIL_img_to_file(ctx, capImg, ext)) 
+        await ctx.send(file=await util.PIL_img_to_file(ctx, capImg, ext)) 
 
     @this.command(name="caption", description="Custom image caption.")
     async def new(self, ctx, *, input=None):

@@ -40,7 +40,9 @@ class Misc(commands.Cog, description="misc commands"):
 
     async def cog_command_error(self, ctx, error: Exception):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f">{ctx.command} on cooldown. Try again in {round(error.retry_after, 1)} seconds.", delete_after=3)
+            if ctx.interaction is None: 
+                await ctx.message.delete()
+            await ctx.send(f"{ctx.bot.command_prefix}{ctx.command} on cooldown. Try again in {int(error.retry_after)} seconds.", delete_after=3)
 
 async def setup(client):
     await client.add_cog(Misc(client))
