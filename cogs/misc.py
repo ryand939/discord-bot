@@ -22,7 +22,7 @@ class Misc(commands.Cog, description="misc commands"):
 
 
     @misc.command(name="rr", description="Russian roulette - 1hr timeout.", aliases=["russianroulette"])
-    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.cooldown(1, 30, commands.BucketType.member)
     async def rr(self, ctx):
         if ctx.interaction: await ctx.interaction.response.defer()
         rng = np.random.default_rng()
