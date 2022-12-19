@@ -22,13 +22,13 @@ class Misc(commands.Cog, description="misc commands"):
 
 
     @misc.command(name="rr", description="Russian roulette - 1hr timeout.", aliases=["russianroulette"])
-    @commands.cooldown(1, 30, commands.BucketType.member)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def rr(self, ctx):
         if ctx.interaction: await ctx.interaction.response.defer()
         rng = np.random.default_rng()
         randomNumber = rng.integers(0, 6) + 1
         if randomNumber == 1:
-            await ctx.send(ctx, fileSend=discord.File("./resources/misc/media/rip.gif"))
+            await ctx.send(file=discord.File("./resources/misc/media/rip.gif"))
             # pause for dramatic effect
             await asyncio.sleep(5) 
             # timeout for 1 hour
