@@ -32,8 +32,6 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
         playerName = player[:-5]           # player names are displayed without tag
         game = self.get_game(ctx, True)    # find the game or create new
         
-        if ctx.interaction is None: 
-            await ctx.message.delete()
         # case author is player 1
         if game[1] == player and game[3].can_make_move("x") and game[3].get_tile(x, y) is None:
             if game[3].player_move(x, y, "x"):
@@ -50,6 +48,7 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
                 game[5] = True
         # case no player 2, author is now player 2
         elif game[2] == "" and game[1] != player and game[3].get_tile(x, y) is None:
+            print("here")
             game[2] = player
             game[4].embeds[0].set_field_at(1, name="Player 2", value=f"```{playerName}```")
             game[4].embeds[0].set_footer(text=f"Command: {ctx.bot.command_prefix}ttt move {{number}}")
@@ -59,6 +58,11 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
         # case author is not player 1/2, do nothing
         else:
             return
+
+        if ctx.interaction is None: 
+            await ctx.message.delete()
+        else: await ctx.send("Move successful!", ephemeral=True, delete_after=1)
+
         # move completed, check fullness of board
         if game[3].board_full() and game[5] != True:
             await self.game_over(ctx, game, f"{game[1][:-5]} and {game[2][:-5]} tied!")
@@ -76,11 +80,7 @@ class TicTacToe(commands.Cog, description="tictactoe commands"):
         if game is not None and (game[1] == player or game[2] == player):
             saveEmbed = game[4].embeds[0]
             await game[4].delete()
-            
-            if ctx.interaction is not None:
-                await ctx.interaction.response.send_message(embed=saveEmbed)
-            else:
-                game[4] = await ctx.send(embed=saveEmbed)
+            game[4] = await ctx.send(embed=saveEmbed)
 
             
 

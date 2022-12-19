@@ -39,22 +39,18 @@ class Priv9(commands.Cog, description="priv9 commands"):
         minutes = minutes % 60
         seconds = releaseDate.seconds % 60
         send = f"Priv9 will release in {releaseDate.days} days, {hours} hours, {minutes} minutes, and {seconds} seconds"
-        #await ctx.send(send)
-        await util.send_message(ctx, send)
+        await ctx.send(send)
 
     @priv9.command(name="ad", description="Send the next priv9 ad.")
     async def ad(self, ctx):
         if ctx.interaction: await ctx.interaction.response.defer()
         path = f"./resources/priv9/ad_media/{next(self.imgPool)}"
-        #await ctx.send(file=discord.File(path))
-        await util.send_file(ctx, fileSend=discord.File(path))
+        await ctx.send(file=discord.File(path))
 
     @priv9.command(name="status", description="Track priv9 dev activity.")
     async def status(self, ctx):
         status, desc, time = self.devTask.get_current_task()
         gameEmbed = Embed(title=f"PRIV9 DEV STATUS: {status}", description=desc, color=0x3897f0)
-        #if footer == "-n":
-            #gameEmbed.set_footer(text=f"Next task in {int(time)} minutes")
 
         await ctx.send(embed=gameEmbed)
 

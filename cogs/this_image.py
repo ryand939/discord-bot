@@ -14,7 +14,7 @@ class ThisImage(commands.Cog, description="preset image editor"):
     def __init__(self, client):
         self.client = client
         self.captionGenerator = CaptionGenerator("./resources/fonts/impact.ttf")
-        self.soyPhoneImage = Image.open("./resources/this_image/soyphone.png")
+        self.phoneImage = Image.open("./resources/this_image/phone.png")
 
 
     @commands.hybrid_group(name='this')
@@ -43,12 +43,11 @@ class ThisImage(commands.Cog, description="preset image editor"):
                 capImg = self.captionGenerator.multiline_caption(img, newInput[0].strip())
             else:
                 capImg = self.captionGenerator.multiline_caption(img, newInput[0].strip(), newInput[1].strip())
-            #await ctx.channel.send(file=await util.PIL_img_to_file(ctx, img, ext)) 
-            await util.send_PIL_img(ctx, img, ext)
+            await ctx.send(file=await util.PIL_img_to_file(ctx, img, ext)) 
 
 
-    @this.command(name="soyphone", description="Soyphone reaction.")
-    async def soyphone(self, ctx):
+    @this.command(name="phone", description="Phone reaction.")
+    async def phone(self, ctx):
         if ctx.interaction: await ctx.interaction.response.defer()
         img, ext = await util.get_last_img(ctx, 6)
         cv2_img = numpy.asarray(img)
@@ -73,11 +72,11 @@ class ThisImage(commands.Cog, description="preset image editor"):
                                      [width, height]])   # bottom right
 
         matrix = cv2.getPerspectiveTransform(original_pt, transform_pt)
-        warpedImg = cv2.warpPerspective(cv2_img, matrix, self.soyPhoneImage.size)
+        warpedImg = cv2.warpPerspective(cv2_img, matrix, self.phoneImage.size)
         finalImg = cv2.cvtColor(warpedImg, cv2.COLOR_BGRA2BGR)
         PILImg = Image.fromarray(finalImg)
-        PILImg.paste(self.soyPhoneImage, (0, 0), self.soyPhoneImage)
-        await util.send_PIL_img(ctx, PILImg, ext)
+        PILImg.paste(self.phoneImage, (0, 0), self.phoneImage)
+        await ctx.send(file=await util.PIL_img_to_file(ctx, PILImg, ext)) 
 
 
     def get_offset_cords(self, hypotenuse, oppositeSide, adjacentSide):

@@ -13,9 +13,9 @@ class LemePost(commands.Cog, description="Leme pics and more"):
 
     def __init__(self, client):
         self.client = client
-        self.lemeList = ["https://api.thecatapi.com/v1/images/search", # lemeList[0] - CAT
-                         "https://randomfox.ca/floof/",                 # lemeList[1] - FOX
-                         "https://dog.ceo/api/breeds/image/random",# lemeList[2] - DOG
+        self.lemeList = ["https://api.thecatapi.com/v1/images/search", 
+                         "https://randomfox.ca/floof/",                 
+                         "https://dog.ceo/api/breeds/image/random",
                          "https://random-d.uk/api/random"]
         self.captionGenerator = caption_generator.CaptionGenerator("./resources/fonts/impact.ttf")
 

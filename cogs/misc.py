@@ -22,27 +22,26 @@ class Misc(commands.Cog, description="misc commands"):
 
 
     @misc.command(name="rr", description="Russian roulette - 1hr timeout.", aliases=["russianroulette"])
-    @commands.cooldown(1, 30, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.member)
     async def rr(self, ctx):
         if ctx.interaction: await ctx.interaction.response.defer()
         rng = np.random.default_rng()
         randomNumber = rng.integers(0, 6) + 1
         if randomNumber == 1:
-            await util.send_file(ctx, fileSend=discord.File("./resources/misc/media/rip.gif"))
+            await ctx.send(ctx, fileSend=discord.File("./resources/misc/media/rip.gif"))
             # pause for dramatic effect
             await asyncio.sleep(5) 
             # timeout for 1 hour
             await ctx.author.timeout(datetime.timedelta(hours=1), reason=f"You rolled {randomNumber}")
             await ctx.send(ctx.message.author.mention + f" has been timed out for 1 hour.")
         else:
-            await util.send_message(ctx, ctx.message.author.mention + f" survived russian roulette! Random number = {randomNumber}")
+            await ctx.send(ctx.message.author.mention + f" survived russian roulette! Random number = {randomNumber}")
 
 
     async def cog_command_error(self, ctx, error: Exception):
         if isinstance(error, commands.CommandOnCooldown):
-            if ctx.interaction is None: 
-                await ctx.message.delete()
-            await ctx.send(f"{ctx.bot.command_prefix}{ctx.command} on cooldown. Try again in {int(error.retry_after)} seconds.", delete_after=3)
+            await util.send_cooldown_alert(ctx, error=error, deleteAfter=3)
+
 
 async def setup(client):
     await client.add_cog(Misc(client))

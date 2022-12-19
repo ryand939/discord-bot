@@ -22,14 +22,14 @@ class Economy(commands.Cog, description="economy commands"):
 
 
     @econ.command(name="redeem", description="Redeem 100 daercoin.")
-    @commands.cooldown(1, 60*60*12, commands.BucketType.user)
+    @commands.cooldown(1, 60*60*6, commands.BucketType.member)
     async def redeem(self, ctx):
         self.bank.deposit(ctx.guild.id, ctx.author.id, 100)
         balance = self.bank.balance(ctx.guild.id, ctx.author.id)
         await ctx.send(f"Redeemed successfully. Your new daercoin balance is: ${balance}")
 
 
-    @econ.command(name="balance", description="Your daercoin balance.")
+    @econ.command(name="balance", description="Your daercoin balance.", aliases=["bal"])
     async def balance(self, ctx, user: discord.Member = None):
         if not user: 
             # no user param, user is author
@@ -76,9 +76,7 @@ class Economy(commands.Cog, description="economy commands"):
     
     async def cog_command_error(self, ctx, error: Exception):
         if isinstance(error, commands.CommandOnCooldown):
-            if ctx.interaction is None: 
-                await ctx.message.delete()
-            await ctx.send(f"{ctx.bot.command_prefix}{ctx.command} on cooldown. Try again later.", delete_after=3)
+            await util.send_cooldown_alert(ctx, error=error, deleteAfter=5)
 
         
 
