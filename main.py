@@ -18,9 +18,9 @@ client = commands.Bot(command_prefix = prefix,
 
 @client.event
 async def on_ready():
-    print(f"{client.user} in server:")
-    for guild in client.guilds:
-        print(f"{guild.name}")
+    print(f"[STARTUP] {client.user} in server:")
+    for index, guild in enumerate(client.guilds):
+        print(f"[{index+1}] {guild.name}")
 
     for filename in os.listdir("./cogs"):
         if filename.endswith(".py"):
@@ -38,7 +38,7 @@ async def on_message(message):
     if message.author.bot: return
 
     # perform action on any user message
-    await handle_on_message(message) 
+    await handle_on_message(client, message) 
     
     # now process command if there is any
     await client.process_commands(message)   

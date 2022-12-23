@@ -1,7 +1,9 @@
 
 import json
-class BotConfig:
 
+# simple config system that stores a dictionary for each individual server
+
+class BotConfig:
 
     def __init__(self, filename: str):
         self.filename = filename
@@ -70,6 +72,18 @@ class BotConfig:
                 return sorted(file_data[serverID].items(), key=lambda points: points[1], reverse=True)
         except:
             return None
+
+    
+    def list_all(self):
+        try:
+            with open(self.filename, 'r') as file:
+                file_data = json.load(file)
+                return file_data
+        except:
+            return None
+    
     
         
-
+config = BotConfig("./resources/storage/autodelete.json")
+serverList = config.list_all()
+print(serverList)

@@ -5,10 +5,7 @@ from urllib.request import Request, urlopen
 import discord
 from PIL import Image
 import requests
-
-# testing
 import cv2
-import numpy
 
 # this file contains various useful functions used by other features
 
@@ -115,3 +112,9 @@ async def send_cooldown_alert(ctx, error: Exception, deleteAfter = None):
     # send final message
     await ctx.send(f"{ctx.bot.command_prefix}{ctx.command} on cooldown. Try again in {cooldownTime}.", delete_after=deleteAfter)
         
+def appropriate_suffix(number: int):
+    number = number % 10
+    if number in [0, 4, 5, 6, 7, 8, 9]: return "th"
+    elif number == 1: return "st"
+    elif number == 2: return "nd"
+    else: return "rd"
