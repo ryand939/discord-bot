@@ -48,6 +48,8 @@ class BotConfig:
         try:
             with open(self.filename,'r') as file:
                 file_data = json.load(file)
+                if key not in file_data[serverID].keys():
+                    return False
                 
             with open(self.filename,'w') as file:
                 del file_data[serverID][key]
@@ -84,6 +86,3 @@ class BotConfig:
     
     
         
-config = BotConfig("./resources/storage/autodelete.json")
-serverList = config.list_all()
-print(serverList)
