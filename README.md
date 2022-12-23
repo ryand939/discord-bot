@@ -10,6 +10,7 @@ A [discord.py](https://discordpy.readthedocs.io/en/stable/) bot I made for my pe
 - Animal Picture Grabber
 - Pull Random Quote From JSON
 - Local Storage/Config System
+- Per-Channel Autodelete Messages After Nth Index
 - *More misc features*
 
 *I'm always adding new features so these may be outdated*
