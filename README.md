@@ -1,6 +1,6 @@
 # discord-bot
 
-A [discord.py](https://discordpy.readthedocs.io/en/stable/) bot I made for my personal server as well as some friend's servers.
+A [discord.py](https://discordpy.readthedocs.io/en/stable/) bot I made for myself and some friends.
 
 ## Features
 - Tic-Tac-Toe
