@@ -1,4 +1,3 @@
-import os
 import discord
 from help import invoke_group_help
 import util

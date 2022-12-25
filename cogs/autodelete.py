@@ -6,48 +6,57 @@ import util
 from config import BotConfig
 
 
-class Autodelete(commands.Cog, description="autodelete commands"):
+class Autodelete(commands.Cog, description="admin autodelete commands"):
 
 
     def __init__(self, client):
         self.client = client
         self.config = BotConfig("./resources/storage/autodelete.json")
-        self.serverList = self.config.list_all()
+        self.serverList = self.config.get_list()
         self.messageList = {}
         self.timerList = []
 
 
 
-    @commands.hybrid_group(name='autodelete')
+    @commands.hybrid_group(name='autodelete',hidden=True)
     async def autodelete(self, ctx):
         if ctx.invoked_subcommand is None:
             await invoke_group_help(ctx.cog.walk_commands(), ctx)
 
 
     # register / set channel for autodelete
-    @autodelete.command(name="set", description="Register/set channel.", aliases=["register"])
+    @autodelete.command(name="set", description="Register/set channel.", aliases=["register"],hidden=True)
     @commands.has_permissions(administrator=True)
-    async def admin_set_autodelete(self, ctx, num):
+    async def register(self, ctx, num):
         serverID = str(ctx.guild.id)
         channelID = str(ctx.channel.id)
+        # turn off AD for this channel if input "off" or <=0
         if (not num.isdigit() and num == "off") or int(num) <= 0:
             await ctx.send(f"Autodelete: Disabled for channel ```{channelID}```")
+            # remove setting from local config and update the server setting list
             self.config.clear(serverID, channelID)
-            self.serverList = self.config.list_all()
+            self.serverList = self.config.get_list()
             # remove from messageList
             self.messageList.pop(channelID, None)
-            self.get_timer(channelID)[1].cancel()
+            # cancel and remove timer
+            timer = self.get_timer(channelID)
+            self.timerList.remove(timer)
+            timer[1].cancel()
             return
+        # valid request, register channel with autodelete
         msg = await ctx.send(f"Autodelete: Catching up on deletes, please be patient. " + 
                     "For this operation to be successful, the oldest unpinned message in the channel must be no older than 14 days.")
         self.config.set(serverID, channelID, int(num))
-        self.serverList = self.config.list_all()
+        self.serverList = self.config.get_list()
         await self.catchup(ctx)
         rtnStr = f"Autodelete: Done. Deleting after the {num}{util.appropriate_suffix(int(num))} message."
         await msg.edit(content=rtnStr)
 
 
-    @autodelete.command(name="catchup", description="Catch up on undeleted messages.", aliases=["cu"])
+    # needed in cases where somehow an unpinned message doesnt get deleted
+    # this could happen in the case of an old message being unpinned, or message sent while bot lost connection
+    # this method validates tthat he channels in a guild have had old messages deleted
+    @autodelete.command(name="catchup", description="Catch up on undeleted messages.", aliases=["cu"],hidden=True)
     @commands.has_permissions(administrator=True)
     async def catchup(self, ctx):
         await self.load_guild(ctx.guild)
@@ -55,11 +64,12 @@ class Autodelete(commands.Cog, description="autodelete commands"):
 
     # takes a guild and prepares each channel registered with autodelete
     async def load_guild(self, guild, singleChannel=None):
-        obligations = self.config.sorted_list(str(guild.id)) if singleChannel is None else [singleChannel]
+        obligations = self.config.get_list(str(guild.id)) if singleChannel is None else [singleChannel]
 
         if obligations is not None:
             for index in range(0, len(obligations)):
                 channel = self.client.get_channel(int(obligations[index][0]))
+                print(f"[Autodelete] Loading messages in {channel.guild.name}: #{channel.name}")
                 messages = [message async for message in channel.history(limit=None)]
                 self.messageList.update({obligations[index][0]: await self.delete_messages(channel, messages, obligations[index][1], len(messages))})
 
@@ -78,8 +88,8 @@ class Autodelete(commands.Cog, description="autodelete commands"):
             self.timerList[-1][1].start(message.channel, self.timerList[-1])
 
 
-    # this function runs every 10s, twice
-    # 10s passes, then the 2nd iteration removes the timer and deletes the accumulated messsages
+    # this function runs every 15s, twice
+    # 15s passes, then the 2nd iteration removes the timer and deletes the accumulated messsages
     async def delete_List(self, channel, timer):
         if timer[1].current_loop == 1:
             stop = self.serverList[str(channel.guild.id)][str(channel.id)]
@@ -107,13 +117,6 @@ class Autodelete(commands.Cog, description="autodelete commands"):
         await channel.delete_messages(messages[lowerRange:upperRange])
         return await self.delete_messages(channel, messages, stop, lowerRange)
 
-    # checks if a channel has any autodelete settings
-    def has_setting(self, channel):
-        for guild in self.serverList.keys():
-            if channel in self.serverList[guild].keys():
-                return channel
-        return False
-
     # gets the timer associated with a channel if one exists
     def get_timer(self, channelID):
         for timer in self.timerList:
@@ -122,11 +125,13 @@ class Autodelete(commands.Cog, description="autodelete commands"):
         return None
 
     @catchup.error
-    @admin_set_autodelete.error
+    @register.error
     async def invalid_user(self, ctx, error):
         if ctx.interaction is None: await ctx.message.delete()
         if isinstance(error, commands.MissingPermissions):
             await ctx.send("U need admin for that kid", delete_after=3)
+        else:
+            print(error)
 
 # load the cog and prepare each guild registered with autodelete
 async def setup(client):

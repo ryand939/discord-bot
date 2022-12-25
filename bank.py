@@ -29,5 +29,5 @@ class Bank():
         self.bank.clear(str(guildID), str(userID))
 
     def leaderboard(self, guildID):
-        return self.bank.sorted_list(str(guildID))
+        return self.bank.get_list(str(guildID), sort=True)
 

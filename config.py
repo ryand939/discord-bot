@@ -66,23 +66,20 @@ class BotConfig:
                 return max(file_data[serverID], key=file_data[serverID].get)
         except:
             return None
-    
-    def sorted_list(self, serverID: str):
-        try:
-            with open(self.filename, 'r') as file:
-                file_data = json.load(file)
-                return sorted(file_data[serverID].items(), key=lambda points: points[1], reverse=True)
-        except:
-            return None
 
-    
-    def list_all(self):
+
+    def get_list(self, serverID: str = None, sort = False):
         try:
             with open(self.filename, 'r') as file:
                 file_data = json.load(file)
-                return file_data
-        except:
-            return None
+                if serverID is None:
+                    return file_data
+                elif sort == True:
+                    return sorted(file_data[serverID].items(), key=lambda points: points[1], reverse=True)
+                else:
+                    return [(key, value) for key, value in file_data[serverID].items()]
+
+        except: return None
     
     
         
