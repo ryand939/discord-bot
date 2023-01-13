@@ -5,6 +5,7 @@ from discord.ext import commands
 from bank import Bank
 from random import choice, randint
 import asyncio
+from config import BotConfig
 
 class Gamble(commands.Cog, description="gambling commands"):
 
@@ -12,6 +13,7 @@ class Gamble(commands.Cog, description="gambling commands"):
     def __init__(self, client):
         self.client = client
         self.bank = Bank()
+        self.config = BotConfig("./resources/storage/gamble.json")
 
 
 
@@ -20,12 +22,14 @@ class Gamble(commands.Cog, description="gambling commands"):
     async def gamble(self, ctx):
         if ctx.invoked_subcommand is None:
             await invoke_group_help(ctx.cog.walk_commands(), ctx)
+        
 
 
     @gamble.command(name="coinflip", description="Heads or tails.", aliases=["cf"])
     @commands.cooldown(1, 5, commands.BucketType.member)
     async def coinflip(self, ctx, side: str, bet: int):
-        if ctx.interaction: await ctx.interaction.response.defer()
+        if not await self.is_gamble_channel(ctx): return
+        elif ctx.interaction: await ctx.interaction.response.defer()
         
         # check input and confirm user has enough money to cover the bet
         if side.lower() not in ["t","tail","tails","h","head","heads"] or bet <= 0:
@@ -52,6 +56,38 @@ class Gamble(commands.Cog, description="gambling commands"):
             await ctx.send(ctx.message.author.mention + f" {sideResult}, unlucky!")
 
         
+    
+    @gamble.command(name="setchannel", description="Set gambling channel.", aliases=["channel"])
+    @commands.has_permissions(administrator=True)
+    async def setchannel(self, ctx, channel: discord.TextChannel):
+        if ctx.interaction: await ctx.interaction.response.defer()
+
+        # none if dne, channel id int if exist
+        gambleChannel = self.config.get(str(ctx.guild.id), "gamblechannel")
+
+        # if param is current gamble channel, remove
+        if channel.id == gambleChannel:
+            self.config.clear(str(ctx.guild.id),"gamblechannel")
+            await ctx.send(f"Gambling commands will no longer be limited to {channel.id}.", delete_after=8)
+        # if param is not current gamble channel, add
+        else:
+            self.config.set(str(ctx.guild.id), "gamblechannel", channel.id)
+            await ctx.send(f"Successfully set gambling channel to {channel.id}. Gambling commands will not work anywhere else.", delete_after=8)
+
+
+    # determines if a command was send from a registered gambling channel
+    async def is_gamble_channel(self, ctx):
+        gambleChannel = self.config.get(str(ctx.guild.id), "gamblechannel")
+
+        # not correct gamble channel
+        if gambleChannel != ctx.channel.id and gambleChannel is not None:
+            await ctx.message.delete()
+            cnl = await self.client.fetch_channel(gambleChannel)
+            await ctx.send(f"Please use {cnl.mention} to gamble.", delete_after=6)
+            return False
+        else: 
+            return True
+
 
 
 

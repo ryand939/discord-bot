@@ -138,7 +138,7 @@ async def setup(client):
     cogInstance = Autodelete(client)
     await client.add_cog(cogInstance)
     for guild in client.guilds:
-        if str(guild.id) in cogInstance.serverList.keys():
+        if cogInstance.serverList != None and str(guild.id) in cogInstance.serverList.keys():
             await cogInstance.load_guild(guild)
 
 
