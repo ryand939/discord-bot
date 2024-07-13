@@ -1,11 +1,12 @@
 from config import BotConfig
+from util import bot_directory
 
 class Bank():
     
     # bank class that makes use of my config.py file and has more specific features
 
     def __init__(self):
-        self.bank = BotConfig("./resources/storage/economy.json")
+        self.bank = BotConfig(f"{bot_directory}resources/storage/economy.json")
 
     def withdraw(self, guildID, userID, amount):
         balance = self.bank.get(str(guildID), str(userID))

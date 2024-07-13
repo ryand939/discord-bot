@@ -6,8 +6,24 @@ import discord
 from PIL import Image
 import requests
 import cv2
+from discord import Embed
+from datetime import datetime
 
 # this file contains various useful functions used by other features
+
+prefix = ">"
+bot_directory = "./discord-bot/"
+
+# creates a standardised embed message with timestamp
+def get_embed(title, content=None, attachment=None):
+    embed = Embed(title=title, color=0x3897f0)
+    now = datetime.now()
+    embed.set_image(url=attachment)
+    embed.description = content
+    embed.set_footer(text=f"daerbot at {now.strftime('%Y-%m-%d %H:%M:%S')}")
+    return embed
+
+    
 
 
 # gets the last png or jpeg not sent by bot within range. Return (-1, -1) if fail
@@ -110,7 +126,9 @@ async def send_cooldown_alert(ctx, error: Exception, deleteAfter = None):
     elif "minutes" in cooldown: cooldownTime = f"{cooldown['minutes']} minutes and {cooldown['seconds']} seconds"
     else: cooldownTime = f"{cooldown['seconds']} seconds"
     # send final message
-    await ctx.send(f"{ctx.bot.command_prefix}{ctx.command} on cooldown. Try again in {cooldownTime}.", delete_after=deleteAfter)
+    cooldown_embed = get_embed("Command on cooldown", f"{ctx.bot.command_prefix}{ctx.command} on cooldown. Try again in {cooldownTime}.")
+    cooldown_embed.colour=0xe60000
+    await ctx.send(embed=cooldown_embed, delete_after=deleteAfter)
         
 def appropriate_suffix(number: int):
     number = number % 10

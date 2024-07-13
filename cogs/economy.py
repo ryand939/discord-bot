@@ -3,6 +3,7 @@ from help import invoke_group_help
 import util
 from discord.ext import commands
 from bank import Bank
+from util import get_embed
 
 
 class Economy(commands.Cog, description="economy commands"):
@@ -28,31 +29,44 @@ class Economy(commands.Cog, description="economy commands"):
     async def redeem(self, ctx):
         self.bank.deposit(ctx.guild.id, ctx.author.id, 100)
         balance = self.bank.balance(ctx.guild.id, ctx.author.id)
-        await ctx.send(f"Redeemed successfully. Your new daercoin balance is: ${balance}")
+        redeem_embed = get_embed("Successfully redeemed 100 daercoin", f"Your new daercoin balance is: ${balance}")
+        redeem_embed.colour=0x00e600 
+        await ctx.send(embed=redeem_embed)
 
 
     @econ.command(name="balance", description="Your daercoin balance.", aliases=["bal"])
     async def balance(self, ctx, user: discord.Member = None):
         if not user: 
             # no user param, user is author
-            await ctx.send(f"Your current daercoin balance is: ${self.bank.balance(ctx.guild.id, ctx.author.id)}")
+            balance_embed = get_embed(f"{ctx.message.author.name}'s balance", f"{ctx.message.author.name}'s current balance is: ${self.bank.balance(ctx.guild.id, ctx.author.id)}")
         else: 
-            await ctx.send(f"{user.display_name}'s current daercoin balance is: ${self.bank.balance(ctx.guild.id, user.id)}")
+            balance_embed = get_embed(f"{user.display_name}'s balance", f"{user.display_name}'s current balance is: ${self.bank.balance(ctx.guild.id, user.id)}")
 
+        await ctx.send(embed=balance_embed)
     
+
     @econ.command(name="gift", description="Gift daercoin to user.")
     async def gift(self, ctx, user: discord.Member, amount: int):
         if amount <= 0 or user.bot:
             if ctx.interaction is None: 
                 await ctx.message.delete()
-            await ctx.send(f"Invalid donation.", delete_after=3)
+            gift_embed = get_embed(f"Donation failed", f"This donation is forbidden.")
+            gift_embed.colour=0xe60000
+            await ctx.send(embed=gift_embed, delete_after=5)
         elif self.bank.withdraw(ctx.guild.id, ctx.author.id, amount):
             self.bank.deposit(ctx.guild.id, user.id, amount)
-            await ctx.send(f"Gifted {amount} daercoin successfully to {user.display_name}.")
+            
+            gift_embed = get_embed(f"Successfully gifted daercoin", f"{amount} daercoin has been successfully transferred to {user.display_name}'s balance.")
+            gift_embed.colour=0x00e600 
+            await ctx.send(embed=gift_embed)
         else:
             if ctx.interaction is None: 
                 await ctx.message.delete()
-            await ctx.send(f"You can't afford that!", delete_after=3)
+                
+            gift_embed = get_embed("Failed to gift daercoin", "You can't afford that!")
+            gift_embed.colour=0xe60000
+            await ctx.send(embed=gift_embed, delete_after=5)
+
 
     @econ.command(name="top", description="Top 10 most richest users.")
     async def top(self, ctx):

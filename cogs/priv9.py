@@ -16,7 +16,7 @@ class Priv9(commands.Cog, description="priv9 commands"):
         self.client = client
         # load the priv9 ads
         adList = []
-        for file in os.listdir("./resources/priv9/ad_media"):
+        for file in os.listdir(f"{util.bot_directory}resources/priv9/ad_media"):
             if file.endswith(".gif"):
                 adList.append(file)
         self.imgPool = cycle(adList)
@@ -44,7 +44,7 @@ class Priv9(commands.Cog, description="priv9 commands"):
     @priv9.command(name="ad", description="Send the next priv9 ad.")
     async def ad(self, ctx):
         if ctx.interaction: await ctx.interaction.response.defer()
-        path = f"./resources/priv9/ad_media/{next(self.imgPool)}"
+        path = f"./discord-bot/resources/priv9/ad_media/{next(self.imgPool)}"
         await ctx.send(file=discord.File(path))
 
     @priv9.command(name="status", description="Track priv9 dev activity.")

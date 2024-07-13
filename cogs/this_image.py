@@ -6,6 +6,7 @@ from PIL import Image
 import util
 import cv2
 import numpy
+from util import bot_directory
 
 
 class ThisImage(commands.Cog, description="preset image editor"):
@@ -13,8 +14,8 @@ class ThisImage(commands.Cog, description="preset image editor"):
 
     def __init__(self, client):
         self.client = client
-        self.captionGenerator = CaptionGenerator("./resources/fonts/impact.ttf")
-        self.phoneImage = Image.open("./resources/this_image/phone.png")
+        self.captionGenerator = CaptionGenerator(f"{util.bot_directory}resources/fonts/impact.ttf")
+        self.phoneImage = Image.open(f"{util.bot_directory}resources/this_image/phone.png")
 
 
     @commands.hybrid_group(name='this')
@@ -25,7 +26,7 @@ class ThisImage(commands.Cog, description="preset image editor"):
 
     @this.command(name="leme", description="This is leme.")
     async def leme(self, ctx):
-        await ctx.interaction.response.defer()
+        if ctx.interaction: await ctx.interaction.response.defer()
         img, ext = await util.get_last_img(ctx, 6) 
         if ext == -1: return 0
         RGBImg = img.convert('RGB')

@@ -3,6 +3,8 @@ from help import invoke_group_help
 import json
 import os
 from discord.ext import commands
+from discord import Embed
+from util import bot_directory
 
 
 class Quote(commands.Cog, name="Quote"):
@@ -12,12 +14,13 @@ class Quote(commands.Cog, name="Quote"):
         self.client = client
         self.quoteDict = {}
 
-        for filename in os.listdir("./resources/quotes"):
+        for filename in os.listdir(f"{bot_directory}resources/quotes"):
             if filename.endswith("_quotes.json"):
-                quoteJSON = json.load(open(f"./resources/quotes/{filename}"))
+                quoteJSON = json.load(open(f"{bot_directory}resources/quotes/{filename}"))
                 shuffle(quoteJSON)
                 self.quoteDict.update({filename[:-12] : iter(quoteJSON)})
                 self.quoteDict.update({filename[:-5] : quoteJSON})
+
 
 
 
@@ -30,18 +33,23 @@ class Quote(commands.Cog, name="Quote"):
 
     @quote.command(name="donut", description="DonutSandwich01 quote.")
     async def donut(self, ctx):
-        await ctx.send(self.get_quote("donut", "DonutSandwich01"))
+        await ctx.send(embed=self.get_quote("donut", "DonutSandwich01", "https://i.imgur.com/jXXAJXk.png"))
+
+    @quote.command(name="surfer", description="Surfer quote.")
+    async def surfer(self, ctx):
+        await ctx.send(embed=self.get_quote("surfer", "Surfer", "https://i.imgur.com/ycLjyko.png"))
 
     
 
     # gets the next quote to send given a name key and the user's full alias
-    def get_quote(self, nameKey, fullName):
+    def get_quote(self, nameKey, fullName, icon):
         rtnStr = next(self.quoteDict[nameKey], None)
         if rtnStr is None:
             self.reset_quotes(nameKey)
             rtnStr = next(self.quoteDict[nameKey], None)
-        rtnStr = f"\"{rtnStr}\"\n-{fullName}"
-        return rtnStr
+        embed = Embed(description=f"*{rtnStr}*")
+        embed.set_author(name=fullName, icon_url=icon)
+        return embed
 
 
     # resets the quote iterator given a name

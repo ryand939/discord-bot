@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, time
 import json
 from random import randrange
+from util import bot_directory
 
 
 class Task():
@@ -10,7 +11,7 @@ class Task():
         self.description = None 
         self.endTime = None 
         self.startTime = None 
-        self.taskJSON = json.load(open(f"./resources/priv9/tasks.json"))
+        self.taskJSON = json.load(open(f"{bot_directory}resources/priv9/tasks.json"))
         self.start_new_task()
         
     def start_new_task(self):
