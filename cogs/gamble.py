@@ -120,19 +120,19 @@ class Gamble(commands.Cog, description="gambling commands"):
             return await ctx.send("Insufficient funds " + ctx.message.author.mention, delete_after=3)
             
         randomValue = random()
-        chance = (1 / guess)
+        # insane house edge because i dont want people getting rich. im evil and i want people to lose muahahahaha
+        final_random = round((max(1.0, 1 / randomValue * 0.89)), 3)
 
         gamble_embed = util.get_embed(f"Limbo: {ctx.message.author.name} bet {bet} daercoin with a guess of {guess}x", None)
         gamble_embed.description = f"Guessing lower than the bot could win them {math.floor(bet * guess)} daercoin!"
         
         message = await ctx.send(embed=gamble_embed)
         await asyncio.sleep(5) 
-        # insane house edge because i dont want people getting rich. im evil and i want people to lose muahahahaha
-        if randomValue <= (chance - (chance * 0.11)):
+        if final_random >= guess:
             
             gamble_embed.title = f"Limbo: {ctx.message.author.name} won {math.floor(bet * guess)} daercoin!"
             self.bank.deposit(ctx.guild.id, ctx.author.id, math.floor(bet * guess))
-            gamble_embed.description = f"daerbot generated {round((1 / randomValue), 3)} and {ctx.message.author.name} guessed {guess}! \nLeaving them with a balance of {self.bank.balance(ctx.guild.id, ctx.author.id)} daercoin"
+            gamble_embed.description = f"daerbot generated {final_random} and {ctx.message.author.name} guessed {guess}! \nLeaving them with a balance of {self.bank.balance(ctx.guild.id, ctx.author.id)} daercoin"
             gamble_embed.colour=0x00e600 #GREEN WIN COLOUR
         else:
             gamble_embed.title = f"Limbo: {ctx.message.author.name} lost {bet} daercoin!"
