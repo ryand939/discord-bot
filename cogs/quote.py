@@ -7,7 +7,7 @@ from discord import Embed
 from util import bot_directory
 
 
-class Quote(commands.Cog, name="Quote"):
+class Quote(commands.Cog, description="motivational quotes"):
 
 
     def __init__(self, client):

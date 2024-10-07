@@ -1,3 +1,5 @@
+# util.py
+
 import json
 from urllib.parse import urlparse
 from io import BytesIO
@@ -7,20 +9,29 @@ from PIL import Image
 import requests
 import cv2
 from discord import Embed
-from datetime import datetime
+
+from datetime import timedelta
+import math
 
 # this file contains various useful functions used by other features
 
 prefix = ">"
 bot_directory = "./discord-bot/"
 
+# ok these are some good failure and success colors I like to use
+# i wish i could do something like var colours = {red: 0x00e600, green: 0xe60000} 
+# but i dont think this is possible in python
+success_green = 0x00e600
+failure_red = 0xe60000
+default_blue = 0x03b6fc
+warning_yellow = 0xfcd703
+
 # creates a standardised embed message with timestamp
-def get_embed(title, content=None, attachment=None):
-    embed = Embed(title=title, color=0x3897f0)
-    now = datetime.now()
-    embed.set_image(url=attachment)
+def get_embed(title, content=None, attachment=None, col=0x3897f0):
+    embed = Embed(title=title, color=col)
     embed.description = content
-    embed.set_footer(text=f"daerbot at {now.strftime('%Y-%m-%d %H:%M:%S')}")
+    embed.set_image(url=attachment)
+    embed.timestamp = discord.utils.utcnow()
     return embed
 
     
@@ -102,37 +113,74 @@ def resize_img_cv2(img, width=None, height=None, inter = cv2.INTER_AREA):
         dimensions = (width, int(h * ratio))
     return cv2.resize(img, dimensions, interpolation = inter)
 
-# takes a seconds integer and returns a dictionary with the hours/minutes/seconds
-def parse_delay(seconds):
-    if seconds < 60:
-        return {"seconds":seconds}
-    minutes = seconds // 60
-    seconds = seconds % 60
-    if minutes < 60: 
-        return {"minutes":minutes, "seconds":seconds}
-    hours = minutes // 60
-    minutes = minutes % 60
-    if hours < 24:
-        return {"hours":hours, "minutes":minutes, "seconds":seconds}
 
-async def send_cooldown_alert(ctx, error: Exception, deleteAfter = None):
-    # if a slash command wasn't used, delete the original message
-    if ctx.interaction is None: 
-        await ctx.message.delete()
-    # get a dictionary with delay in hours/minutes/seconds
-    cooldown = parse_delay(int(error.retry_after))
-    # create the cooldown string
-    if "hours" in cooldown: cooldownTime = f"{cooldown['hours']} hours, {cooldown['minutes']} minutes, and {cooldown['seconds']} seconds"
-    elif "minutes" in cooldown: cooldownTime = f"{cooldown['minutes']} minutes and {cooldown['seconds']} seconds"
-    else: cooldownTime = f"{cooldown['seconds']} seconds"
-    # send final message
-    cooldown_embed = get_embed("Command on cooldown", f"{ctx.bot.command_prefix}{ctx.command} on cooldown. Try again in {cooldownTime}.")
-    cooldown_embed.colour=0xe60000
-    await ctx.send(embed=cooldown_embed, delete_after=deleteAfter)
-        
 def appropriate_suffix(number: int):
     number = number % 10
     if number in [0, 4, 5, 6, 7, 8, 9]: return "th"
     elif number == 1: return "st"
     elif number == 2: return "nd"
     else: return "rd"
+
+
+
+
+def get_command_text(ctx, with_all_params = False):
+    if hasattr(ctx, 'prefix') and ctx.prefix: 
+        command_prefix = ctx.prefix.strip()
+    else: 
+        command_prefix = "/"
+    if ctx.command: 
+        command_name = ctx.command.qualified_name
+    else: 
+        command_name = "unknown command"
+    if with_all_params:
+        text = f"{command_prefix}{command_name} " + " ".join([f"<{param.name}>" for param in ctx.command.params.values() if param.name != 'self' and param.kind in [param.POSITIONAL_ONLY, param.POSITIONAL_OR_KEYWORD]])
+    else: text = f"{command_prefix}{command_name}"
+    return text
+
+
+
+def get_user_args(ctx):
+    message_words = ctx.message.content.split()
+    command_full_name_with_prefix = ctx.prefix + ctx.command.qualified_name
+    command_words = command_full_name_with_prefix.split()
+    num_words_to_skip = len(command_words)
+    user_args = message_words[num_words_to_skip:]
+    return user_args
+
+
+
+def get_command_and_args(ctx):
+    user_args = get_user_args(ctx)
+    command_part_name = get_command_text(ctx, with_all_params=False)
+    input_command = f"{command_part_name} {' '.join(user_args)}"
+    return input_command
+
+
+
+async def send_error_embed(ctx, title, description, delete_after=10, footer=None, send=True):
+    embed = discord.Embed( description=description, color=failure_red, timestamp=discord.utils.utcnow())
+    embed.set_author(name=f"Error: {title}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+    
+    if not footer:  embed.set_footer(text=f"{get_command_text(ctx, with_all_params=False)}")
+    else:           embed.set_footer(text=footer)
+
+
+    if send: await send_embed_delete_after(ctx=ctx, embed=embed, delete_after=delete_after)
+    else: return embed
+    
+# for some reason, sending embeds with deleteafter or ephemeral is confusing af!
+async def send_embed_delete_after(ctx, embed, delete_after=None):
+    is_interaction = hasattr(ctx, 'interaction') and isinstance(ctx.interaction, discord.Interaction) and ctx.interaction is not None
+
+    if is_interaction:
+        interaction = ctx.interaction
+        try:
+            if not interaction.response.is_done():
+                await interaction.response.send_message(embed=embed, ephemeral=(delete_after is not None))
+            else:
+                await interaction.followup.send(embed=embed, ephemeral=(delete_after is not None))
+        except discord.InteractionResponded:
+            await interaction.followup.send(embed=embed, ephemeral=(delete_after is not None))
+    else:
+        await ctx.send(embed=embed, delete_after=delete_after)

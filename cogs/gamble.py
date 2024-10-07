@@ -1,21 +1,24 @@
+# gamble.py
+
 import os
 import discord
 import math
 from help import invoke_group_help
+from discord import app_commands
 from discord.ext import commands
 from bank import Bank
-from random import choice, randint, random
 import asyncio
 from config import BotConfig
 from discord import Embed
+from resources.gamble.coinflip.coinflip import Coinflip
+from resources.gamble.collectable.gamble_collectable import CollectableGamble
+from resources.gamble.limbo.limbo import Limbo
 
 import util
 
 
 
-
-class Gamble(commands.Cog, description="gambling commands"):
-
+class Gamble(commands.Cog, description="Gamble for items and daercoin"):
 
     def __init__(self, client):
         self.client = client
@@ -24,168 +27,124 @@ class Gamble(commands.Cog, description="gambling commands"):
 
 
 
+    async def before_gamble(self, ctx):
+         # check if gambling channel
+        if not await self.is_gamble_channel(ctx):
+            raise commands.CheckFailure("Not gambling channel")
+        if isinstance(ctx, discord.Interaction):
+            await ctx.response.defer()
+
+
 
     @commands.hybrid_group(name='gamble')
-    async def gamble(self, ctx):
+    async def gamble_group(self, ctx):
         if ctx.invoked_subcommand is None:
             await invoke_group_help(ctx.cog.walk_commands(), ctx)
-        
 
 
-    @gamble.command(name="coinflip", description="Heads or tails.", aliases=["cf"])
+
+    @gamble_group.command(name="coinflip", description="Heads or tails.", aliases=["cf"])
     @commands.cooldown(1, 7, commands.BucketType.member)
+    @commands.before_invoke(before_gamble)
+    @app_commands.describe(side="Heads or tails. Accepts input 't', 'tail', 'tails', 'h', 'head', or 'heads'",
+                           bet="Your daercoin bet. If you win, you will double your bet.")
     async def coinflip(self, ctx, side: str, bet: int):
-        if not await self.is_gamble_channel(ctx): return
-        elif ctx.interaction: await ctx.interaction.response.defer()
-        
-        # check input and confirm user has enough money to cover the bet
-        if side.lower() not in ["t","tail","tails","h","head","heads"] or bet <= 0:
-            return await ctx.send("Invalid input " + ctx.message.author.mention, delete_after=3)
-        elif not self.bank.withdraw(ctx.guild.id, ctx.author.id, bet):
-            return await ctx.send("Insufficient funds " + ctx.message.author.mention, delete_after=3)
-        
-        sideGuess = side
-        if side.lower() == "h" or side.lower() == "head": sideGuess = "heads"
-        elif side.lower() == "t" or side.lower() == "tail": sideGuess = "tails"
+        # instantiate and execute a Coinflip game
+        coinflip = Coinflip(ctx, bet, side)
+        await coinflip.flip()
 
 
-        # determine side, send a coinflip gif and wait for it to play out
-        randomNumber = randint(0,1)
-        if randomNumber == 0: 
 
-            attachment = discord.File(f'./resources/gamble/coinflip/heads/' + 
-            choice(os.listdir(os.getcwd() + f"/resources/gamble/coinflip/heads/")), filename = "gif.gif")
-        else: 
-            attachment = discord.File(f"./resources/gamble/coinflip/tails/" + 
-            choice(os.listdir(os.getcwd() + f"/resources/gamble/coinflip/tails/")), filename = "gif.gif")
-        
-        gamble_embed = util.get_embed(f"Coinflip: {ctx.message.author.name} bet {bet} daercoin on {sideGuess}!", None)
-        gamble_embed.set_image(url="attachment://gif.gif")
-        message = await ctx.send(file=attachment, embed=gamble_embed)
+    @gamble_group.command(name="limbo", description="Guess lower than bot!", aliases=["l"])
+    @commands.cooldown(1, 7, commands.BucketType.member)
+    @commands.before_invoke(before_gamble)
+    @app_commands.describe(guess="Your random number guess >1.0. You want the bot to generate something HIGHER than this.",
+                           bet="Your daercoin bet. If you win, you will receive {GUESS*BET} daercoin")
+    async def limbo(self, ctx, guess: float, bet: int):
+        # instantiate and execute a Limbo game
+        limbo = Limbo(ctx, bet, guess)
+        await limbo.play()
 
-        await asyncio.sleep(6) 
-        sideResult = "heads" if randomNumber == 0 else "tails"
-        self.config.set(str(ctx.guild.id), sideResult, 1, True)
 
-        # reveal results with a message
 
-        # IF THEY WIN
-        if (randomNumber == 0 and side.lower()[0] == 'h') or (randomNumber == 1 and side.lower()[0] == 't'):
-            self.bank.deposit(ctx.guild.id, ctx.author.id, bet*2)
-            gamble_embed.title = f"Coinflip: {ctx.message.author.name} won {bet} daercoin!"
-            gamble_embed.colour=0x00e600 #GREEN WIN COLOUR
-            self.config.set(str(ctx.guild.id), "wins", 1, True)
+    @gamble_group.command(name="collectable", description="Gamble your daercoin for a collectable item!", aliases=["col"])
+    @commands.before_invoke(before_gamble)
+    @app_commands.describe(daercoin="Bet amount (500-2000 DC). Higher bets increase odds for rarer items.")
+    async def collectable(self, ctx, daercoin: int):
+        # instantiate and execute collectable gamble
+        gamble_collectable = CollectableGamble(ctx, daercoin)
+        await gamble_collectable.play()
 
-        # IF THEY LOSE
-        else: 
-            gamble_embed.title = f"Coinflip: {ctx.message.author.name} lost {bet} daercoin!"
-            gamble_embed.colour=0xe60000 #RED LOSS COLOUR
-            self.config.set(str(ctx.guild.id), "losses", 1, True)
 
-        gamble_embed.set_image(url=None)
-        gamble_embed.description = f"Leaving them with a balance of {self.bank.balance(ctx.guild.id, ctx.author.id)} daercoin"
-        await message.delete()
-        await ctx.send(embed=gamble_embed)
-            
 
-    @gamble.command(name="stats", description="Game history.", aliases=["stat"])
+    @gamble_group.command(name="stats", description="Game history.", aliases=["stat"])
     @commands.cooldown(1, 5, commands.BucketType.member)
     async def stats(self, ctx):
-        if ctx.interaction: await ctx.interaction.response.defer()
-
-        headsNum = self.config.get(str(ctx.guild.id), "heads")
-        tailsNum = self.config.get(str(ctx.guild.id), "tails")
+        headsNum = await self.config.get(str(ctx.guild.id), "heads")
+        tailsNum = await self.config.get(str(ctx.guild.id), "tails")
         
-        wins = self.config.get(str(ctx.guild.id), "wins")
-        losses = self.config.get(str(ctx.guild.id), "losses")
+        wins = await self.config.get(str(ctx.guild.id), "wins")
+        losses = await self.config.get(str(ctx.guild.id), "losses")
         headsNum = 0 if headsNum is None else headsNum
         tailsNum = 0 if tailsNum is None else tailsNum
         output = f"Heads: {headsNum}\nTails: {tailsNum}\nWins: {wins}\nLosses: {losses}"
         await ctx.send(f"```{output}```")
 
-
-    @gamble.command(name="limbo", description="Guess lower than bot!", aliases=["l"])
-    @commands.cooldown(1, 6, commands.BucketType.member)
-    async def limbo(self, ctx, guess: float, bet: int):
-        if not await self.is_gamble_channel(ctx): return
-        elif ctx.interaction: await ctx.interaction.response.defer()
-        
-
-        # check input and confirm user has enough money to cover the bet
-        if guess <= 1: 
-            return await ctx.send(f"Invalid input {ctx.message.author.mention}. Guess must be above 1.0.", delete_after=3)
-        elif bet <= 0:
-            return await ctx.send(f"Invalid input {ctx.message.author.mention}.", delete_after=3)
-        elif not self.bank.withdraw(ctx.guild.id, ctx.author.id, bet):
-            return await ctx.send("Insufficient funds " + ctx.message.author.mention, delete_after=3)
-            
-        randomValue = random()
-        # insane house edge because i dont want people getting rich. im evil and i want people to lose muahahahaha
-        final_random = round((max(1.0, 1 / randomValue * 0.89)), 3)
-
-        gamble_embed = util.get_embed(f"Limbo: {ctx.message.author.name} bet {bet} daercoin with a guess of {guess}x", None)
-        gamble_embed.description = f"Guessing lower than the bot could win them {math.floor(bet * guess)} daercoin!"
-        
-        message = await ctx.send(embed=gamble_embed)
-        await asyncio.sleep(5) 
-        if final_random >= guess:
-            
-            gamble_embed.title = f"Limbo: {ctx.message.author.name} won {math.floor(bet * guess)} daercoin!"
-            self.bank.deposit(ctx.guild.id, ctx.author.id, math.floor(bet * guess))
-            gamble_embed.description = f"daerbot generated {final_random} and {ctx.message.author.name} guessed {guess}! \nLeaving them with a balance of {self.bank.balance(ctx.guild.id, ctx.author.id)} daercoin"
-            gamble_embed.colour=0x00e600 #GREEN WIN COLOUR
-        else:
-            gamble_embed.title = f"Limbo: {ctx.message.author.name} lost {bet} daercoin!"
-            gamble_embed.description = f"daerbot generated {round((1 / randomValue), 3)} and {ctx.message.author.name} guessed {guess}. \nLeaving them with a balance of {self.bank.balance(ctx.guild.id, ctx.author.id)} daercoin"
-            gamble_embed.colour=0xe60000 #RED LOSS COLOUR
-
-        await message.edit(embed=gamble_embed)
-
-
-
-
-
-
-    
-    @gamble.command(name="setchannel", description="Set gambling channel.", aliases=["channel"])
+    @gamble_group.command(name="setchannel", description="Set gambling channel.", aliases=["channel"])
     @commands.has_permissions(administrator=True)
     async def setchannel(self, ctx, channel: discord.TextChannel):
-        if ctx.interaction: await ctx.interaction.response.defer()
-
         # none if dne, channel id int if exist
-        gambleChannel = self.config.get(str(ctx.guild.id), "gamblechannel")
+        gambleChannel = await self.config.get(str(ctx.guild.id), "gamblechannel")
 
         # if param is current gamble channel, remove
         if channel.id == gambleChannel:
-            self.config.clear(str(ctx.guild.id),"gamblechannel")
+            await self.config.clear(str(ctx.guild.id),"gamblechannel")
             await ctx.send(f"Gambling commands will no longer be limited to {channel.id}.", delete_after=8)
         # if param is not current gamble channel, add
         else:
-            self.config.set(str(ctx.guild.id), "gamblechannel", channel.id)
+            await self.config.set(str(ctx.guild.id), "gamblechannel", channel.id)
             await ctx.send(f"Successfully set gambling channel to {channel.id}. Gambling commands will not work anywhere else.", delete_after=8)
 
 
-    # determines if a command was send from a registered gambling channel
     async def is_gamble_channel(self, ctx):
-        gambleChannel = self.config.get(str(ctx.guild.id), "gamblechannel")
+        gambleChannel = await self.config.get(str(ctx.guild.id), "gamblechannel")
 
-        # not correct gamble channel
         if gambleChannel != ctx.channel.id and gambleChannel is not None:
-            await ctx.message.delete()
-            cnl = await self.client.fetch_channel(gambleChannel)
-            await ctx.send(f"Please use {cnl.mention} to gamble.", delete_after=6)
+            cnl = self.client.get_channel(gambleChannel)
+            if cnl:
+                if not isinstance(ctx, discord.Interaction): await ctx.message.delete()
+                title = "Error: Incorrect channel for gambling"
+                description = f"Please use the {cnl.mention} channel to gamble."
+                color = util.failure_red
+                delete_after = 12
+            else:
+                title = "Warning: Gambling channel could not be found."
+                description = "The gambling channel for this server has been assigned, but the channel itself has likely been deleted. Daerbot will disregard this nonexistent channel going forward and allow gambling everywhere."
+                await self.config.clear(str(ctx.guild.id),"gamblechannel")
+                color = util.warning_yellow
+                delete_after = None
+
+            embed = discord.Embed(description=description, color=color, timestamp=discord.utils.utcnow())
+            embed.set_author(name=title, icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+            embed.set_footer(text=util.get_command_text(ctx) )
+            await ctx.send(embed=embed, delete_after=delete_after)
+
             return False
-        else: 
-            return True
+        return True
 
 
-
-
+    
     async def cog_command_error(self, ctx, error: Exception):
         if isinstance(error, commands.CommandOnCooldown):
-            pass # delay is just to let the current game play out
+            pass
+            #await util.send_cooldown_alert(ctx, error=error, deleteAfter=5)
+        elif isinstance(error, commands.CheckFailure):
+            # The error message is already sent in 'is_gamble_channel'
+            pass
         else:
-            print(error)
+            print(f"Unhandled error in guild {ctx.guild.id} for user {ctx.author.id}: {error}")
+
+
 
 
 async def setup(client):

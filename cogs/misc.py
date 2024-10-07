@@ -1,46 +1,49 @@
+# misc.py
+
+
+
+
 import discord
-from help import invoke_group_help
+from discord import Embed
+from discord.ext import commands
+import help
 import util
-from discord.ext import commands, tasks
-import datetime
-import numpy as np
-import asyncio
 
-class Misc(commands.Cog, description="misc commands"):
+from resources.misc.russian_roulette import RussianRoulette
 
 
-    def __init__(self, client):
-        self.client = client
-        # preventing people from using roulette over and over
-        self.rouletteTimeouts = []
+class Misc(commands.Cog, description="Miscellaneous commands"):
+    def __init__(self, bot):
+        self.bot = bot
+        # Initialize other necessary attributes here (e.g., bank, config)
+
+
 
 
     @commands.hybrid_group(name='misc')
     async def misc(self, ctx):
         if ctx.invoked_subcommand is None:
-            await invoke_group_help(ctx.cog.walk_commands(), ctx)
+            await help.invoke_group_help(ctx.cog.walk_commands(), ctx)
 
 
-    @misc.command(name="rr", description="Russian roulette - 1hr timeout.", aliases=["russianroulette"])
-    @commands.cooldown(1, 30, commands.BucketType.member)
-    async def rr(self, ctx):
-        if ctx.interaction: await ctx.interaction.response.defer()
-        rng = np.random.default_rng()
-        randomNumber = rng.integers(0, 6) + 1
-        if randomNumber == 1:
-            await ctx.send(file=discord.File("./resources/misc/media/rip.gif"))
-            # pause for dramatic effect
-            await asyncio.sleep(5) 
-            # timeout for 1 hour
-            await ctx.author.timeout(datetime.timedelta(hours=1), reason=f"You rolled {randomNumber}")
-            await ctx.send(ctx.message.author.mention + f" has been timed out for 1 hour.")
-        else:
-            await ctx.send(ctx.message.author.mention + f" survived russian roulette! Random number = {randomNumber}")
+    @misc.command(name="russianroulette", description="Russian roulette - 1/6 chance for 1hr timeout.", aliases=["rr"])
+    @commands.cooldown(1, 0, commands.BucketType.member)
+    async def rr(self, ctx):        
+        if isinstance(ctx, discord.Interaction):
+            await ctx.response.defer()
+        russian_roulette = RussianRoulette(ctx)
+        await russian_roulette.execute()
 
 
-    async def cog_command_error(self, ctx, error: Exception):
-        if isinstance(error, commands.CommandOnCooldown):
-            await util.send_cooldown_alert(ctx, error=error, deleteAfter=3)
+#    async def cog_command_error(self, ctx, error: Exception):
+        #if isinstance(error, commands.CommandOnCooldown):
+         #   await util.send_cooldown_alert(ctx, error=error, deleteAfter=8)
+        #else:
+         #   print(f"Unhandled error in guild {ctx.guild.id} for user {ctx.author.id}: {error}")
+           
+
+
+
 
 
 async def setup(client):

@@ -1,3 +1,5 @@
+# economy.py
+
 import discord
 from help import invoke_group_help
 import util
@@ -6,16 +8,16 @@ from bank import Bank
 from util import get_embed
 
 
-class Economy(commands.Cog, description="economy commands"):
+class Economy(commands.Cog, description="participate in the daerconomy"):
 
 
     def __init__(self, client):
         self.client = client
         self.bank = Bank()
         # per user cooldown, used for rewarding activity
-        self.messageEarnCooldown = commands.CooldownMapping.from_cooldown(1, 120, commands.BucketType.user)
-        # reward for chatting
-        self.chatReward = 2
+        self.messageEarnCooldown = commands.CooldownMapping.from_cooldown(1, 330, commands.BucketType.user)
+        # passive reward for chatting
+        self.chatReward = 10
 
 
     @commands.hybrid_group(name='econ')
@@ -24,66 +26,116 @@ class Economy(commands.Cog, description="economy commands"):
             await invoke_group_help(ctx.cog.walk_commands(), ctx)
 
 
+
     @econ.command(name="redeem", description="Redeem 100 daercoin.")
     @commands.cooldown(1, 60*60*6, commands.BucketType.member)
     async def redeem(self, ctx):
-        self.bank.deposit(ctx.guild.id, ctx.author.id, 100)
-        balance = self.bank.balance(ctx.guild.id, ctx.author.id)
-        redeem_embed = get_embed("Successfully redeemed 100 daercoin", f"Your new daercoin balance is: ${balance}")
-        redeem_embed.colour=0x00e600 
+        await self.bank.deposit(ctx.guild.id, ctx.author.id, 100)
+        balance = await self.bank.balance(ctx.guild.id, ctx.author.id)
+        redeem_embed = get_embed(title=None, content=f"They now have a balance of `{balance}` daercoin", col=util.success_green)
+        redeem_embed.set_author(name=f"{ctx.author.display_name} redeemed 100 daercoin", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+        redeem_embed.set_footer(text=util.get_command_text(ctx))
         await ctx.send(embed=redeem_embed)
-
+    
 
     @econ.command(name="balance", description="Your daercoin balance.", aliases=["bal"])
     async def balance(self, ctx, user: discord.Member = None):
-        if not user: 
-            # no user param, user is author
-            balance_embed = get_embed(f"{ctx.message.author.name}'s balance", f"{ctx.message.author.name}'s current balance is: ${self.bank.balance(ctx.guild.id, ctx.author.id)}")
-        else: 
-            balance_embed = get_embed(f"{user.display_name}'s balance", f"{user.display_name}'s current balance is: ${self.bank.balance(ctx.guild.id, user.id)}")
+        user = ctx.author if not user else user
 
+        balance_embed = get_embed(title=None, content=f"{user.display_name} currently has a balance of `{await self.bank.balance(ctx.guild.id, user.id)}` daercoin.")
+        balance_embed.set_author(name=f"{user.display_name}'s balance", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+        balance_embed.set_footer(text=util.get_command_text(ctx))
         await ctx.send(embed=balance_embed)
     
 
     @econ.command(name="gift", description="Gift daercoin to user.")
     async def gift(self, ctx, user: discord.Member, amount: int):
-        if amount <= 0 or user.bot:
-            if ctx.interaction is None: 
-                await ctx.message.delete()
-            gift_embed = get_embed(f"Donation failed", f"This donation is forbidden.")
-            gift_embed.colour=0xe60000
-            await ctx.send(embed=gift_embed, delete_after=5)
-        elif self.bank.withdraw(ctx.guild.id, ctx.author.id, amount):
-            self.bank.deposit(ctx.guild.id, user.id, amount)
-            
-            gift_embed = get_embed(f"Successfully gifted daercoin", f"{amount} daercoin has been successfully transferred to {user.display_name}'s balance.")
-            gift_embed.colour=0x00e600 
+
+        # some checks to make sure donation is allowed
+        if amount <= 0 or user.bot or user == ctx.author:
+            if ctx.interaction is None: await ctx.message.delete()
+            await util.send_error_embed(ctx=ctx, title="Donation Failed", description="This donation is forbidden.", delete_after=10)
+
+        # see if they have enough DC and withdraw and donate if so
+        elif await self.bank.withdraw(ctx.guild.id, ctx.author.id, amount):
+            # SUCCESS CASE
+            await self.bank.deposit(ctx.guild.id, user.id, amount)
+            gift_embed = discord.Embed(description=f"{amount} daercoin has been transferred to {user.display_name}'s balance.", 
+                                       color=util.success_green, timestamp=discord.utils.utcnow())
+            gift_embed.set_author(name=f"Successfully gifted daercoin to {user.display_name}", icon_url=user.display_avatar.url if user.display_avatar else None)
+            gift_embed.set_footer(text=f"Daercoin gifted by {ctx.author}", icon_url=ctx.author.display_avatar.url if ctx.author.display_avatar else None)
+            gift_embed.add_field(name="Donor", value=f"{ctx.author.mention}", inline=True)
+            gift_embed.add_field(name="Recipient", value=f"{user.mention}", inline=True)
+            gift_embed.add_field(name="Total Gifted", value=f"`{amount} daercoin`", inline=True)
             await ctx.send(embed=gift_embed)
+        # FAIL they dont have enough DC
         else:
             if ctx.interaction is None: 
                 await ctx.message.delete()
-                
-            gift_embed = get_embed("Failed to gift daercoin", "You can't afford that!")
-            gift_embed.colour=0xe60000
-            await ctx.send(embed=gift_embed, delete_after=5)
+            await util.send_error_embed(ctx=ctx, title="Donation Failed", description=f"You can't afford to make a `{amount}` daercoin donation!", delete_after=10)
 
 
     @econ.command(name="top", description="Top 10 most richest users.")
     async def top(self, ctx):
-        leaderboard = self.bank.leaderboard(ctx.guild.id)
-        maxRange = len(leaderboard) if len(leaderboard) < 10 else 10
-        rtnStr = f"most richest daercoin holders:\n\n{'Name' : <16}{'$DC' : ^12}\n"
-        for x in range(0, maxRange):
-            member = ctx.guild.get_member(int(leaderboard[x][0]))
-            # member left the server cannot be resolved
+        leaderboard = await self.bank.leaderboard(ctx.guild.id)
+        max_range = min(len(leaderboard), 10) 
+
+        if max_range == 0:
+            no_leaderboard_embed = discord.Embed(
+                title="Top 10 Richest Daercoin Holders",
+                description="No users have daercoin yet.",
+                color=discord.Color.blue()
+            )
+            await ctx.send(embed=no_leaderboard_embed)
+            return
+
+        # embed
+        embed = discord.Embed(color=discord.Color.gold(), timestamp=discord.utils.utcnow())
+        embed.set_author(name="Top 10 Richest Daercoin Holders", icon_url=ctx.guild.icon.url if ctx.guild.icon else None)
+        embed.set_footer(text=util.get_command_text(ctx))
+        
+
+        # leaderboard string
+        leaderboard_str = ""
+        for rank in range(max_range):
+            user_id, balance = leaderboard[rank]
+            member = ctx.guild.get_member(int(user_id))
+
+            # members who have left the server
             if member is None:
-                print(f"Removing unknown user: {leaderboard[x]}")
-                self.bank.remove(ctx.guild.id, leaderboard[x][0])
-                return await self.top(ctx)
-            if leaderboard[x][1] > 0:
-                rtnStr += f"{member.name: <16}{str(leaderboard[x][1]) : ^12}\n"
-        rtnStr = f'```{rtnStr}```'
-        await ctx.send(rtnStr)
+                # remove the user from the leaderboard
+                await self.bank.remove(ctx.guild.id, user_id)
+                print(f"Removed user with ID {user_id} from the leaderboard as they have left the server.")
+                continue  # Skip to the next user
+
+            # only include users with a positive balance. dont know how they would get negative but still
+            if balance <= 0:
+                continue
+
+            if rank == 0: rank_str = "🥇"
+            elif rank == 1: rank_str = "🥈"
+            elif rank == 2: rank_str = "🥉"
+            else: rank_str = f"{rank + 1}th"
+
+            # truncate the username if necessary
+            display_name = member.display_name
+            max_name_length = 20  # Adjust as needed
+            if len(display_name) > max_name_length:
+                display_name = display_name[:max_name_length - 3] + "..."
+
+            # format the balance with comma separators
+            formatted_balance = f"{balance:,} DC"
+
+            # line for each leaderboard entry
+            leaderboard_str += f"{rank_str}. **{display_name}** - `{formatted_balance}`\n" if rank_str[-1] == "h" else f"{rank_str}  **{display_name}** - `{formatted_balance}`\n"
+
+
+        embed.description = leaderboard_str
+
+
+        await ctx.send(embed=embed)
+
+
 
 
 
@@ -94,12 +146,14 @@ class Economy(commands.Cog, description="economy commands"):
         if message.author.bot: return
         bucket = self.messageEarnCooldown.get_bucket(message)
         if not bucket.update_rate_limit(): 
-            self.bank.deposit(message.guild.id, message.author.id, self.chatReward)
+            await self.bank.deposit(message.guild.id, message.author.id, self.chatReward)
 
     
     async def cog_command_error(self, ctx, error: Exception):
         if isinstance(error, commands.CommandOnCooldown):
-            await util.send_cooldown_alert(ctx, error=error, deleteAfter=5)
+            pass
+        else:
+            print(f"Unhandled error in guild {ctx.guild.id} for user {ctx.author.id}: {error}")
 
         
 

@@ -1,0 +1,220 @@
+{
+    "priv9invite": {
+        "item_id": "priv9invite",
+        "name": "Priv9 invite code",
+        "description": "An invitation code that gives you access to priv9 software.",
+        "itemclass": "collectable",
+        "rarity": "relic"
+    },
+    "goldendaercoin": {
+        "item_id": "goldendaercoin",
+        "name": "Golden daercoin",
+        "description": "A rare and highly valuable coin made of pure gold, representing the highest denomination of daercoin.",
+        "itemclass": "collectable",
+        "rarity": "legendary"
+    },
+    "denniscar": {
+        "item_id": "denniscar",
+        "name": "Dennis's car Willy",
+        "description": "A reliable mode of transportation favoured by Dr. Dennis.",
+        "itemclass": "vehicle",
+        "rarity": "relic"
+    },
+    "cookiemonstersnapback": {
+        "item_id": "cookiemonstersnapback",
+        "name": "Cookie Monster snapback",
+        "description": "A blue, flat-brim snapback featuring Cookie Monster's face embroidered on the front, with adjustable back closure for a custom fit.",
+        "itemclass": "collectable",
+        "rarity": "legendary"
+    },
+    "foxhudinvite": {
+        "item_id": "foxhudinvite",
+        "name": "FoxHud invite code",
+        "description": "An invitation code that gives you access to Mason Foxworth's FoxHud software.",
+        "itemclass": "collectable",
+        "rarity": "legendary"
+    },
+    "masonfoxworthportrait": {
+        "item_id": "masonfoxworthportrait",
+        "name": "Mason Foxworth portrait photograph",
+        "description": "A portrait photograph of our positive friend Mason Foxworth.",
+        "itemclass": "collectable",
+        "rarity": "legendary"
+    },
+    "zooiv": {
+        "item_id": "zooiv",
+        "name": "ZOOIV ESP flag",
+        "description": "A peculiar ESP flag first found in the original onetap cheat.",
+        "itemclass": "collectable",
+        "rarity": "legendary"
+    },
+    "justme": {
+        "item_id": "justme",
+        "name": "Justme thigh pictures",
+        "description": "A collection of pictures depicting the thighs of justme.",
+        "itemclass": "collectable",
+        "rarity": "relic"
+    },
+    "vyvanse": {
+        "item_id": "vyvanse",
+        "name": "Vyvanse",
+        "description": "A prescription stimulant used to treat ADHD and binge eating disorder.",
+        "itemclass": "drug",
+        "rarity": "legendary",
+        "edible": true
+    },
+    "jonomango": {
+        "item_id": "jonomango",
+        "name": "Jono's mango",
+        "description": "One of Jono's many mangos.",
+        "itemclass": "consumable",
+        "rarity": "relic",
+        "edible": true
+    },
+    "ozempic": {
+        "item_id": "ozempic",
+        "name": "Ozempic",
+        "description": "A prescription medication used to manage type 2 diabetes and promote weight loss by regulating blood sugar levels.",
+        "itemclass": "drug",
+        "rarity": "legendary",
+        "injectable": true
+    },
+    "leme": {
+        "item_id": "leme",
+        "name": "Leme",
+        "description": "Your own personal leme to love and care for.",
+        "itemclass": "collectable",
+        "rarity": "relic",
+        "edible": true
+    },
+    "daeredcfg": {
+        "item_id": "daeredcfg",
+        "name": "Daered Onetap config",
+        "description": "A hand crafted configuration file for Onetap HvH.",
+        "itemclass": "collectable",
+        "rarity": "legendary"
+    },
+    "killas": {
+        "item_id": "killas",
+        "name": "Cold Mint Killas",
+        "description": "A 12mg nicotine pouch with a perfectly terrible flavour.",
+        "itemclass": "drug",
+        "rarity": "legendary"
+    },
+    "robertsalinas": {
+        "item_id": "robertsalinas",
+        "name": "Robert Salinas autograph",
+        "description": "An authentic autograph from Robert Salinas.",
+        "itemclass": "collectable",
+        "rarity": "legendary"
+    },
+    "fairlife": {
+        "item_id": "fairlife",
+        "name": "Fairlife skim milk",
+        "description": "Ultra-filtered skim milk offering 84 grams of complete protein for only 480 calories.",
+        "itemclass": "consumable",
+        "rarity": "rare",
+        "edible": true
+    },
+    "dalethefish": {
+        "item_id": "dalethefish",
+        "name": "Dale the fish",
+        "description": "A 3 year old Mabu Pufferfish living with homePage.",
+        "itemclass": "collectable",
+        "rarity": "rare"
+    },
+    "iristhecat": {
+        "item_id": "iristhecat",
+        "name": "Iris the cat",
+        "description": "A friendly little kitty owned by Richard Stroker.",
+        "itemclass": "collectable",
+        "rarity": "rare"
+    },
+    "silverdaercoin": {
+        "item_id": "silverdaercoin",
+        "name": "Silver daercoin",
+        "description": "A shiny silver daercoin.",
+        "itemclass": "collectable",
+        "rarity": "rare"
+    },
+    "dumaurier": {
+        "item_id": "dumaurier",
+        "name": "Du Maurier king size smooth",
+        "description": "A pack of king sized Du Maurier Smooth cigarettes, offering a milder, refined tobacco flavor with a smoother finish for a more relaxed smoke.",
+        "itemclass": "drug",
+        "rarity": "rare",
+        "smokeable": true
+    },
+    "monster": {
+        "item_id": "monster",
+        "name": "Monster Energy drink",
+        "description": "A can of Original Monster.",
+        "itemclass": "consumable",
+        "rarity": "common",
+        "edible": true
+    },
+    "pipe": {
+        "item_id": "pipe",
+        "name": "Pipe",
+        "description": "Glass pipe ideal for smoking drugs.",
+        "itemclass": "tool",
+        "rarity": "uncommon"
+    },
+    "needle": {
+        "item_id": "needle",
+        "name": "Needle",
+        "description": "Needle used to inject drugs.",
+        "itemclass": "tool",
+        "rarity": "uncommon"
+    },
+    "lighter": {
+        "item_id": "lighter",
+        "name": "Lighter",
+        "description": "Use this to start a fire.",
+        "itemclass": "tool",
+        "rarity": "uncommon"
+    },
+    "meth": {
+        "item_id": "meth",
+        "name": "Crystal methamphetamine",
+        "description": "A powerful stimulant that boosts energy and focus.",
+        "itemclass": "drug",
+        "smokeable": true,
+        "injectable": true,
+        "snortable": true,
+        "rarity": "uncommon"
+    },
+    "pallmall": {
+        "item_id": "pallmall",
+        "name": "Pall Mall Red cigarettes",
+        "description": "A carton of Pall Mall Red cigarettes, known for their bold, rich tobacco flavor.",
+        "itemclass": "drug",
+        "smokeable": true
+    },
+    "bronzedaercoin": {
+        "item_id": "bronzedaercoin",
+        "name": "Bronze daercoin",
+        "description": "An old, worthless bronze daercoin.",
+        "itemclass": "collectable"
+    },
+    "weed": {
+        "item_id": "weed",
+        "name": "Weed",
+        "description": "A plant-based drug that causes relaxation and a mild high.",
+        "itemclass": "drug",
+        "smokeable": true
+    },
+    "crack": {
+        "item_id": "crack",
+        "name": "Crack cocaine",
+        "description": "A potent, smokable form of cocaine that delivers a short, intense high.",
+        "itemclass": "drug",
+        "smokeable": true
+    },
+    "metalspoon": {
+        "item_id": "metalspoon",
+        "name": "Metal spoon",
+        "description": "A small shallow bowl with a relatively long handle.",
+        "itemclass": "tool"
+    }
+}

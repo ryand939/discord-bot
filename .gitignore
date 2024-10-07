@@ -62,3 +62,17 @@ resources/storage/autodelete.json
 resources/storage/economy.json
 resources/storage/gamble.json
 resources/quotes/donut_quotes.json
+tic_tac_toe/__pycache__/tic_tac_toe_logic.cpython-311.pyc
+tic_tac_toe/__pycache__/visual_board.cpython-311.pyc
+cogs/__pycache__/info.cpython-311.pyc
+cogs/__pycache__/inventory.cpython-311.pyc
+cogs/__pycache__/room_stalker.cpython-311.pyc
+resources/misc/__pycache__/russian_roulette.cpython-311.pyc
+__pycache__/collectablestats.cpython-311.pyc
+__pycache__/collectable.cpython-311.pyc
+resources/gamble/coinflip/__pycache__/coinflip.cpython-311.pyc
+resources/gamble/__pycache__/gamble_base.cpython-311.pyc
+resources/gamble/collectable/__pycache__/gamble_collectable.cpython-311.pyc
+resources/gamble/limbo/__pycache__/limbo.cpython-311.pyc
+resources/storage/collectable_log.json
+cogs/__pycache__/error_handler.cpython-311.pyc

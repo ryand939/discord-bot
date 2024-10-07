@@ -5,7 +5,7 @@ from util import PIL_img_to_file, get_url_for_image
 from tic_tac_toe.tic_tac_toe_logic import TicTacToeLogic
 from discord import Embed
 
-class TicTacToe(commands.Cog, description="tictactoe commands"):
+class TicTacToe(commands.Cog, description="play tictactoe"):
 
 
     def __init__(self, client):

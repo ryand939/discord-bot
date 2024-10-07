@@ -9,7 +9,7 @@ from resources.priv9.priv9_dev_schedule import Task
 from discord import Embed
 
 
-class Priv9(commands.Cog, description="priv9 commands"):
+class Priv9(commands.Cog, description="priv9 for rust"):
 
 
     def __init__(self, client):
