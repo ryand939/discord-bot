@@ -6,7 +6,6 @@ from PIL import Image
 import util
 import cv2
 import numpy
-from util import bot_directory
 
 
 class ThisImage(commands.Cog, description="preset image editor"):

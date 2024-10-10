@@ -1,7 +1,7 @@
 
 import discord
 from discord.ext import commands
-import util  # Ensure this is correctly imported based on your project structure
+import util  
 import inspect
 
 from discord import Embed
@@ -27,15 +27,16 @@ class ErrorHandler(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         
-        # prevent the handler from processing errors already handled by command error handlers
         if hasattr(ctx.command, 'on_error'):
             return
 
+        anti_spam_cog = self.bot.get_cog('AntiSpam')
         if isinstance(error, commands.CommandNotFound):
+            if anti_spam_cog: 
+                await anti_spam_cog.register_command_usage(user_id=ctx.author.id, ctx=ctx, is_error=True)
             await self.handle_command_not_found(ctx, error)
             return
 
-        # Handle specific error types
         if isinstance(error, commands.MissingRequiredArgument):
             await self.handle_missing_argument(ctx, error)
         elif isinstance(error, commands.BadArgument):
@@ -53,8 +54,12 @@ class ErrorHandler(commands.Cog):
 
 
     async def handle_command_not_found(self, ctx, error):
+        if ctx.invoked_with == "help": 
+            missing_command = str(error)
+        else: 
+            missing_command = ctx.invoked_with
         title = "Command not found"
-        description = f"There is no command `>{ctx.invoked_with}` recognized by daerbot. \n\nPlease ensure you are using subcommands with their respective group command prefix (i.e. `coinflip` can only be called via `>gamble coinflip`, **not** `>coinflip`, as it is a subcommand under `>gamble`)."
+        description = f"There is no command `>{missing_command}` recognized by daerbot. \n\nPlease ensure you are using subcommands with their respective group command prefix (i.e. `coinflip` can only be called via `>gamble coinflip`, **not** `>coinflip`, as it is a subcommand under `>gamble`)."
 
         await util.send_error_embed(ctx, title, description, delete_after=self.cmd_not_found_delete_after, footer="Type >help to list all daerbot commands")
 

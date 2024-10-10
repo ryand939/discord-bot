@@ -1,5 +1,4 @@
-import os
-import discord
+
 from help import invoke_group_help
 from discord.ext import commands, tasks
 import util

@@ -1,14 +1,9 @@
 
 import discord
-from discord import File
 from discord.ext import commands
 from random import choice, random
-import asyncio
-import math
-import os
 
 from resources.gamble.gamble_base import GambleGame
-from collectable import Item
 import util
 
 
@@ -21,18 +16,19 @@ class CollectableGamble(GambleGame):
         :param daercoin: The daercoin amount to bet.
         """
         super().__init__(ctx, daercoin, 'collectable')
-        self.daercoin = daercoin
         self.min_bet = 500
         self.max_bet = 2000
 
     async def play(self):
 
         # validate bet and withdraw
-        if not await self.validate_bet_range(min_amount=self.min_bet, max_amount=self.max_bet): return 
-        if not await self.attempt_withdraw_bet(): return  
+        if not await self.validate_bet_range(min_amount=self.min_bet, max_amount=self.max_bet):
+            return 
+        if not await self.attempt_withdraw_bet():
+            return  
 
         # calculate adjusted probabilities based on bet amount
-        bet_fraction = (self.daercoin - self.min_bet) / (self.max_bet - self.min_bet) if self.max_bet != self.min_bet else 1
+        bet_fraction = (self.bet - self.min_bet) / (self.max_bet - self.min_bet) if self.max_bet != self.min_bet else 1
 
         # base probabilities at min and max bet
         probs_min = {'common': 0.63, 'uncommon': 0.20, 'rare': 0.10, 'legendary': 0.05, 'relic': 0.02}
@@ -96,7 +92,7 @@ class CollectableGamble(GambleGame):
                 icon_url=self.author.avatar.url if self.author.avatar else None
             )
             embed.description = (
-                f"{self.author.display_name}'s {self.daercoin} DC bet would have won them **{obtained_item.name}** "
+                f"{self.author.display_name}'s {self.bet} DC bet would have won them **{obtained_item.name}** "
                 f"from the **{obtained_rarity}** tier, but they already own it. Better luck next time!"
             )
             embed.color = util.failure_red  # Red color for duplicate
@@ -107,7 +103,7 @@ class CollectableGamble(GambleGame):
                 icon_url=self.author.avatar.url if self.author.avatar else None
             )
             embed.description = (
-                f"{self.author.display_name}'s {self.daercoin} DC bet has won them **{obtained_item.name}** "
+                f"{self.author.display_name}'s {self.bet} DC bet has won them **{obtained_item.name}** "
                 f"from the **{obtained_rarity}** tier!"
             )
             embed.color = util.success_green  # Green color for success

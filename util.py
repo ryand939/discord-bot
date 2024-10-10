@@ -158,10 +158,18 @@ def get_command_and_args(ctx):
 
 
 
-async def send_error_embed(ctx, title, description, delete_after=10, footer=None, send=True):
+async def send_error_embed(ctx, title, description, delete_after=10, footer=None, send=True, error=True, duration_minutes=None):
     embed = discord.Embed( description=description, color=failure_red, timestamp=discord.utils.utcnow())
     embed.set_author(name=f"Error: {title}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     
+    if not error: 
+        
+        warning_end = discord.utils.utcnow() + timedelta(seconds=duration_minutes)
+        timestamp_end = math.floor(warning_end.timestamp())
+        string_timer = f"<t:{timestamp_end}:R>"
+        embed.color = warning_yellow
+        embed.set_author(name=f"Warning: {title}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+        embed.add_field(name="Warning ends:", value=string_timer)
     if not footer:  embed.set_footer(text=f"{get_command_text(ctx, with_all_params=False)}")
     else:           embed.set_footer(text=footer)
 

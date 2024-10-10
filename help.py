@@ -42,6 +42,9 @@ class CustomHelpCommand(commands.HelpCommand):
 
         await self.get_destination().send(embed=embed)
     
+    async def command_not_found(self, command):
+        raise commands.CommandNotFound(command)
+        
     
     async def send_cog_help(self, cog):
         return await super().send_cog_help(cog)

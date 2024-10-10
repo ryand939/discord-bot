@@ -23,7 +23,7 @@ class Info(commands.Cog, description="General information gathering commands"):
 
     @info.command(name='daerbot', description="All information about daerbot")
     async def daerbot(self, ctx):
-        # Gather system information
+        # get system information
         uname = platform.uname()
         cpu_usage = psutil.cpu_percent(interval=1)
         memory = psutil.virtual_memory()
@@ -41,7 +41,7 @@ class Info(commands.Cog, description="General information gathering commands"):
         total_guilds = len(self.client.guilds)
         total_users = sum(guild.member_count for guild in self.client.guilds)
         
-        # Create embed
+        # embed
         embed = discord.Embed(title="Daerbot Information",color=discord.Color.blue(), timestamp=discord.utils.utcnow())
         embed.set_thumbnail(url=self.client.user.avatar.url if self.client.user.avatar else None)
         embed.add_field(name="", value=f"A discord.py bot running off a Raspberry Pi 4 in daer's living room!", inline=False)
@@ -57,26 +57,22 @@ class Info(commands.Cog, description="General information gathering commands"):
         embed.add_field(name="**Servers**", value=f"{total_guilds}", inline=True)
         embed.add_field(name="**Users**", value=f"{total_users}", inline=True)
         embed.add_field(name="**Command Prefix**", value=f"{self.client.command_prefix}", inline=True)
-        
-        
-        # footer
         embed.set_footer(text="Use >help to list all commands.")
         
         await ctx.send(embed=embed)
 
     @info.command(name='uptime', description="More detailed daerbot uptime")
     async def uptime(self, ctx):
-        # Calculate uptime
+        # uptime
         uptime_since= int(self.start_time.timestamp())
 
-        # Create embed with no title, and title in author field
+        # embed with no title
         embed = discord.Embed(color=discord.Color.blue(), timestamp=discord.utils.utcnow())
         embed.set_author(name="Daerbot Uptime", icon_url=self.client.user.avatar.url if self.client.user.avatar else None)
         embed.set_footer(text=f"{util.get_command_text(ctx)}")
-        # Use Discord's timestamp formatting to display when the bot started and how long ago
+        # timestamp
         embed.description = f"As of right now, daerbot has seen ZERO DOWNTIME since <t:{uptime_since}:f> (<t:{uptime_since}:R>)!"
 
-        # Send embed
         await ctx.send(embed=embed)
         
 
@@ -85,15 +81,15 @@ class Info(commands.Cog, description="General information gathering commands"):
         # default to the command invoker
         user = user or ctx.author
 
-        # Fetch the user to get the banner (discord.User object)
+        # Fetch the user for banner
         fetched_user = await self.client.fetch_user(user.id)
 
-        # Create an embed with the user's top role color or default to blue
+        # embed with the user top role color or default to blue
         color = user.color if user.color.value else discord.Color.blue()
 
         embed = discord.Embed(color=color, description=f"{user.mention}", timestamp=discord.utils.utcnow())
 
-        # Set the thumbnail to the user's avatar
+        # thumbnail is the user's avatar
         embed.set_thumbnail(url=user.display_avatar.url)
         if fetched_user.banner:
             embed.description += f"\n[Full Size Banner]({fetched_user.banner.url})"
@@ -101,7 +97,6 @@ class Info(commands.Cog, description="General information gathering commands"):
             embed.set_image(url=smaller_banner_url)
 
 
-        # Profile URL linking to the user's Discord profile
         profile_url = f"https://discord.com/users/{user.id}"
 
         # Set the author field with the user's name linked to their profile and their avatar
@@ -111,7 +106,7 @@ class Info(commands.Cog, description="General information gathering commands"):
             url=profile_url
         )
         # Online status and platform
-        status = str(user.status).title()  # e.g., 'Online', 'Offline', 'Idle', 'Do Not Disturb'
+        status = str(user.status).title() 
         platform_statuses = []
         if user.desktop_status != discord.Status.offline:
             platform_statuses.append(f"Status: `{status} (desktop)`")
@@ -125,7 +120,7 @@ class Info(commands.Cog, description="General information gathering commands"):
         else:
             status_details = ""
 
-        # Build "User Info" field
+        # "User Info" field
         is_bot = "Yes" if user.bot else "No"
         creation_date = user.created_at
         user_info = (
@@ -136,35 +131,31 @@ class Info(commands.Cog, description="General information gathering commands"):
         )
         embed.add_field(name="User Info", value=user_info, inline=False)
 
-        # Build "Guild Specific Info" field
+        # "Guild Specific Info"
         guild = ctx.guild
         if guild:
-            # Nickname
             nickname = f"Nickname: `{user.nick}`\n" if user.nick else ""
-
-            # Guild join date
             join_date = user.joined_at
             if join_date:
                 join_date_str = f"<t:{int(join_date.timestamp())}:R> - <t:{int(join_date.timestamp())}:D>"
             else:
                 join_date_str = "`Unknown`"
 
-            # Calculate join position
+            # calc join position
             if join_date:
-                # Filter out members without a join date
+                # filter out members without a join date
                 members = [m for m in guild.members if m.joined_at]
-                # Sort members by their join date
+                # sort members by their join date
                 members.sort(key=lambda m: m.joined_at)
                 try:
-                    # Find the user's position in the sorted list
-                    join_position = [m.id for m in members].index(user.id) + 1  # Positions start at 1
+                    join_position = [m.id for m in members].index(user.id) + 1  # pos start at 1
                     join_position_str = f"`{join_position} / {len(members)}`"
                 except ValueError:
                     join_position_str = "`Unknown`"
             else:
                 join_position_str = "`Unknown`"
 
-            # Special permissions
+            # Acknowledgements
             special_info = []
             if user == guild.owner:
                 special_info.append("`Owner`")
@@ -181,17 +172,13 @@ class Info(commands.Cog, description="General information gathering commands"):
                 special_info_str = ", ".join(special_info)
                 special_info_str = f"Acknowledgements: {special_info_str}\n"
 
-            # Roles (excluding @everyone)
+            # roles (excluding @everyone)
             roles = [role for role in user.roles if role.name != "@everyone"]
-            # Sort roles from highest to lowest based on their position
             roles_sorted = sorted(roles, key=lambda r: r.position, reverse=True)
-            # Convert roles to mentions
             roles_mentions = [role.mention for role in roles_sorted]
-            # Append '@everyone' as plain text at the end
             roles_mentions.append("`@everyone`")
-            # Join the roles into a comma-separated string
             roles_string = ", ".join(roles_mentions)
-            # Truncate the roles string if it's too long (Discord's embed field limit is 1024 characters)
+            # discord's embed field limit is 1024 characters
             if len(roles_string) > 1024:
                 roles_string = roles_string[:1021] + "..."
 
@@ -204,11 +191,11 @@ class Info(commands.Cog, description="General information gathering commands"):
             )
             embed.add_field(name=f"{guild.name.capitalize()} Specific Info", value=guild_info, inline=False)
         else:
-            # If not in a guild context
+            # not in guild context
             embed.add_field(name="Guild Specific Info", value="`Not in a guild context.`", inline=False)
 
-        # Current activities (display all activities)
-        activities = user.activities  # This is a list of Activity objects
+        # Current activities
+        activities = user.activities  # list of Activity objects
         if activities:
             activity_types = {}
             for activity in activities:
@@ -239,22 +226,22 @@ class Info(commands.Cog, description="General information gathering commands"):
                     activity_type = "`Unknown`"
                     activity_name = f"`{str(activity)}`"
 
-                # Group activities by type
+                # Group by type
                 if activity_type not in activity_types:
                     activity_types[activity_type] = []
                 activity_types[activity_type].append(activity_name)
 
-            # Build the activity field content
+            # activity field content
             activity_field_lines = []
             for activity_type, names in activity_types.items():
                 if len(names) > 1:
-                    # Multiple activities of the same type
+                    # case multiple activities of the same type
                     activity_line = f"{activity_type} ({len(names)}): {', '.join(names)}"
                 else:
                     activity_line = f"{activity_type}: {names[0]}"
                 activity_field_lines.append(activity_line)
 
-            # Add the total number of activities if more than one
+            # total number of activities if more than one
             activity_field_name = f"Current Activities ({len(activities)})" if len(activities) > 1 else "Current Activity"
 
             embed.add_field(
@@ -264,13 +251,11 @@ class Info(commands.Cog, description="General information gathering commands"):
             )
 
 
-        # Footer with the requester's information
         embed.set_footer(
             text=f"Requested by {ctx.author}",
             icon_url=ctx.author.display_avatar.url
         )
-
-        # Send the embed
+        
         await ctx.send(embed=embed)
 
 

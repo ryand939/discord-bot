@@ -1,26 +1,15 @@
 
-import os
-import discord
-from discord import File
 from discord.ext import commands
 from random import choice, random
 import math
 import asyncio
 
-from config import BotConfig
 from resources.gamble.gamble_base import GambleGame 
 import util
 
 
 class Limbo(GambleGame):
     def __init__(self, ctx: commands.Context, bet: int, guess: float):
-        """
-        Initializes the Limbo game with the user's guess.
-
-        :param ctx: The context of the command invocation.
-        :param bet: The amount of daercoin bet by the user.
-        :param guess: The user's guess that the bot will generate a higher number than this.
-        """
         super().__init__(ctx, bet, 'limbo')
         self.guess = guess
 

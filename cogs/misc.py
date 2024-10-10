@@ -27,7 +27,7 @@ class Misc(commands.Cog, description="Miscellaneous commands"):
 
 
     @misc.command(name="russianroulette", description="Russian roulette - 1/6 chance for 1hr timeout.", aliases=["rr"])
-    @commands.cooldown(1, 0, commands.BucketType.member)
+    @commands.cooldown(1, 30, commands.BucketType.member)
     async def rr(self, ctx):        
         if isinstance(ctx, discord.Interaction):
             await ctx.response.defer()

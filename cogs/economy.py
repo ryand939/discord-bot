@@ -18,6 +18,7 @@ class Economy(commands.Cog, description="participate in the daerconomy"):
         self.messageEarnCooldown = commands.CooldownMapping.from_cooldown(1, 330, commands.BucketType.user)
         # passive reward for chatting
         self.chatReward = 10
+        self.redeemAmount = 3000 # 6*6*60
 
 
     @commands.hybrid_group(name='econ')
@@ -28,12 +29,12 @@ class Economy(commands.Cog, description="participate in the daerconomy"):
 
 
     @econ.command(name="redeem", description="Redeem 100 daercoin.")
-    @commands.cooldown(1, 60*60*6, commands.BucketType.member)
+    @commands.cooldown(1, 600, commands.BucketType.member)
     async def redeem(self, ctx):
-        await self.bank.deposit(ctx.guild.id, ctx.author.id, 100)
+        await self.bank.deposit(ctx.guild.id, ctx.author.id, self.redeemAmount)
         balance = await self.bank.balance(ctx.guild.id, ctx.author.id)
         redeem_embed = get_embed(title=None, content=f"They now have a balance of `{balance}` daercoin", col=util.success_green)
-        redeem_embed.set_author(name=f"{ctx.author.display_name} redeemed 100 daercoin", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+        redeem_embed.set_author(name=f"{ctx.author.display_name} redeemed {self.redeemAmount} daercoin", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
         redeem_embed.set_footer(text=util.get_command_text(ctx))
         await ctx.send(embed=redeem_embed)
     
@@ -106,7 +107,7 @@ class Economy(commands.Cog, description="participate in the daerconomy"):
                 # remove the user from the leaderboard
                 await self.bank.remove(ctx.guild.id, user_id)
                 print(f"Removed user with ID {user_id} from the leaderboard as they have left the server.")
-                continue  # Skip to the next user
+                continue 
 
             # only include users with a positive balance. dont know how they would get negative but still
             if balance <= 0:

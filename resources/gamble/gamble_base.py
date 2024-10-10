@@ -44,7 +44,7 @@ class GambleGame:
                 description=f"A `{max_amount}` DC bet offers the highest odds for `{util.get_command_text(self.ctx)}`, so your `{old_bet}` DC bet "
                             f"has been capped to the maximum bet of `{max_amount}` daercoin.",
                 embed_type="info",
-                delete_after=8
+                delete_after=None
             )
 
         return True

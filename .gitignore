@@ -76,3 +76,4 @@ resources/gamble/collectable/__pycache__/gamble_collectable.cpython-311.pyc
 resources/gamble/limbo/__pycache__/limbo.cpython-311.pyc
 resources/storage/collectable_log.json
 cogs/__pycache__/error_handler.cpython-311.pyc
+cogs/__pycache__/anti_spam.cpython-311.pyc

@@ -16,6 +16,7 @@ class RussianRoulette:
         self.ctx = ctx
         self.author = ctx.author
         self.footer_text = util.get_command_text(ctx)
+        self.timeout_minutes = 3
         self.survive_img_path = os.path.join(util.bot_directory, "resources", "misc", "media", "survive_compressed.gif")
         self.die_img_path = os.path.join(util.bot_directory, "resources", "misc", "media", "rip_compressed.gif")
     
@@ -70,7 +71,7 @@ class RussianRoulette:
     
 
         # NOW TIME THEM OUT AND UPDATE THE EMBED
-        try: await ctx.author.timeout(timedelta(hours=1), reason=f"Russian Roulette.")
+        try: await ctx.author.timeout(timedelta(minutes=self.timeout_minutes), reason=f"Russian Roulette.")
 
             # CANT TIME THEM OUT BECAUSE NO PRIV ?
         except discord.Forbidden:
@@ -108,7 +109,7 @@ class RussianRoulette:
         # NOW THEY ARE TIMED OUT
         # EDIT THE ORIGINAL MESSAGE SO EVERYONE KNOWS WHAT HAPPENED
         timeout_embed = util.get_embed(title=None, 
-            content=f"{ctx.author.display_name} got unlucky playing russian roulette and has been timed out for 1 hour.",
+            content=f"{ctx.author.display_name} got unlucky playing russian roulette and has been timed out for {self.timeout_minutes} minutes.",
             col=util.failure_red  # Red color for loss
         )
         timeout_embed.set_author(
