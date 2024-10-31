@@ -2,14 +2,6 @@
 
 A [discord.py](https://discordpy.readthedocs.io/en/stable/) bot I made for myself and some friends.
 
-## Features
-- Tic-Tac-Toe
-- Per-Server Economy
-  - Gambling games with server currency
-- Meme Generator (caption/overlay)
-- Animal Picture Grabber
-- Pull Random Quote From JSON
-- Local Storage/Config System
-- Per-Channel Autodelete Messages After Nth Index
-- *More misc features*
+## Commands
+For an automatically updated list of commands, visit [my bot dashboard](https://daerware.com/bot-dashboard/) and check the command section. 
 
